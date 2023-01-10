@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<!-- Created by pdf2htmlEX (https://github.com/coolwanglu/pdf2htmlex) -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="pdf2htmlEX"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+<style type="text/css">
+/* vim: set shiftwidth=2 tabstop=2 autoindent cindent expandtab filetype=css: */
+/*! 
+ * Base CSS for pdf2htmlEX
+ * Copyright 2012,2013 Lu Wang <coolwanglu@gmail.com> 
+ * https://github.com/coolwanglu/pdf2htmlEX/blob/master/share/LICENSE
+ */
+/* Part 1: Web Page Layout: Free to modify, except for a few of them which are required by pdf2htmlEX.js, see the comments */
+#sidebar { /* Sidebar */
+  position:absolute;
+  top:0;
+  left:0;
+  bottom:0;
+  width:250px;
+  padding:0;
+  margin:0px;
+  overflow:auto;
+}
+#page-container { /* PDF container */
+  position:absolute; /* required for calculating relative positions of pages in pdf2htmlEX.js */
+  top:0;
+  left:0px;
+  margin:0; 
+  padding:0;
+  border:0; /* required for lazy page loading in pdf2htmlEX.js (page visibility test) */
+}
+@media screen {
+  /* for sidebar */
+  #sidebar.opened + #page-container { left:250px; }
+  #page-container {
+    /* `bottom' and `right' are required for lazy page loading in pdf2htmlEX.js (page visibility test)
+     * alternatively you may set width and height
+     */
+    bottom:0;
+    right:0;
+    overflow:auto;
+  }
+  .loading-indicator {
+    display:none;
+  }
+  .loading-indicator.active {
+    display:block;
+    position:absolute;
+    width:64px;
+    height:64px;
+    top:50%;
+    left:50%;
+    margin-top:-32px;
+    margin-left:-32px;
+  }
+  .loading-indicator img {
+    position:absolute;
+    top:0;
+    left:0;
+    bottom:0;
+    right:0;
+  }
+}
+@media print { 
+  @page { margin:0; }
+  html { margin:0; }
+  body { 
+    margin:0; 
+    -webkit-print-color-adjust:exact; /* enable printing background images for WebKit */
+  }
+  #sidebar { display:none; }
+  #page-container {
+    width:auto;
+    height:auto;
+    overflow:visible;
+    background-color:transparent;
+  }
+  .d { display:none; }
+}
+/* Part 2: Page Elements: Modify with caution
+ * The followings are base classes, some of which are meant to be override by PDF specific classes
+ * So do not increase the specificity (e.g. ".classname" -> "#page-container .classname")
+ */
+.pf { /* page */
+  position:relative;
+  background-color:white;
+  overflow: hidden;
+  margin:0; 
+  border:0; /* required by pdf2htmlEX.js for page visibility test */
+}
+.pc { /* content of a page */
+  position:absolute;
+  border:0;
+  padding:0;
+  margin:0;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  display:block;
+  /* set transform-origin for scaling */
+  transform-origin:0% 0%;
+  -ms-transform-origin:0% 0%;
+  -webkit-transform-origin:0% 0%;
+}
+.pc.opened { /* used by pdf2htmlEX.js, to show/hide pages */
+  display:block;
+}
+.bf { /* images that occupies the whole page */
+  position:absolute;
+  border:0;
+  margin:0;
+  top:0;
+  bottom:0;
+  width:100%;
+  height:100%;
+  -ms-user-select:none;
+  -moz-user-select:none;
+  -webkit-user-select:none;
+  user-select:none;
+}
+.bi { /* images that cover only a part of the page */
+  position:absolute;
+  border:0;
+  margin:0;
+  -ms-user-select:none;
+  -moz-user-select:none;
+  -webkit-user-select:none;
+  user-select:none;
+}
+@media print {
+  .pf {
+    margin:0;
+    box-shadow:none;
+    page-break-after:always;
+    page-break-inside:avoid;
+  }
+  @-moz-document url-prefix() {
+    /* fix page truncation for FireFox */
+    .pf {
+      overflow:visible;
+      border:1px solid #FFFFFF;
+    }
+    .pc {overflow:visible;}
+  }
+}
+.c { /* clip box */
+  position:absolute;
+  border:0;
+  padding:0;
+  margin:0;
+  overflow:hidden;
+  display:block;
+}
+.t { /* text line */
+  position:absolute;
+  white-space:pre;
+  font-size:1px;
+  transform-origin:0% 100%;
+  -ms-transform-origin:0% 100%;
+  -webkit-transform-origin:0% 100%;
+  unicode-bidi:bidi-override;/* For rtl languages, e.g. Hebrew, we don't want the default Unicode behaviour */
+  -moz-font-feature-settings:"liga" 0;/* We don't want Firefox to recognize ligatures */
+}
+.t:after { /* webkit #35443 */
+  content: '';
+}
+.t:before { /* Workaround Blink(up to 41)/Webkit bug of word-spacing with leading spaces (chromium #404444 and pdf2htmlEX #412) */
+  content: '';
+  display: inline-block;
+}
+.t span { /* text blocks within a line */
+  /* Blink(up to 41)/Webkit have bug with negative word-spacing and inline-block (pdf2htmlEX #416), so keep normal span inline. */
+  position:relative;
+  unicode-bidi:bidi-override; /* For rtl languages, e.g. Hebrew, we don't want the default Unicode behaviour */
+}
+._ { /* text shift */
+  /* Blink(up to 41)/Webkit have bug with inline element, continuous spaces and word-spacing. Workaround by inline-block. */
+  display: inline-block;
+  color: transparent;
+  z-index: -1;
+}
+/* selection background should not be opaque, for fallback mode */
+::selection{
+  background: rgba(127,255,255,0.4);
+}
+::-moz-selection{
+  background: rgba(127,255,255,0.4);
+}
+.pi { /* info for Javascript */
+  display:none;
+}
+.l { /* annotation links */
+}
+/* transparent color - WebKit */
+.d { /* css drawing */
+  position:absolute;
+  transform-origin:0% 100%;
+  -ms-transform-origin:0% 100%;
+  -webkit-transform-origin:0% 100%;
+}
+/* for the forms */
+.it {
+  border: none;
+  background-color: rgba(255, 255, 255, 0.0);
+}
+
+.ir:hover {
+  cursor: pointer;
+}
+
+/* Base CSS END */
+</style>
+<style type="text/css">
+/* vim: set shiftwidth=2 tabstop=2 autoindent cindent expandtab filetype=css: */
+/*! 
+ * Fancy styles for pdf2htmlEX
+ * Copyright 2012,2013 Lu Wang <coolwanglu@gmail.com> 
+ * https://github.com/coolwanglu/pdf2htmlEX/blob/master/share/LICENSE
+ */
+@keyframes fadein { from { opacity:0;} to { opacity:1;} }
+@-webkit-keyframes fadein { from { opacity:0;} to { opacity:1;} }
+@keyframes swing {
+  0%  { transform: rotate(0deg); }
+  10% { transform: rotate(0deg); }
+  90% { transform: rotate(720deg); }
+  100%{ transform: rotate(720deg); }
+}
+@-webkit-keyframes swing {
+  0%  { -webkit-transform: rotate(0deg); }
+  10% { -webkit-transform: rotate(0deg); }
+  90% { -webkit-transform: rotate(720deg); }
+  100%{ -webkit-transform: rotate(720deg); }
+}
+@media screen { 
+  #sidebar {
+    background-color:#2f3236;
+    /* modified from http://philbit.com/svgpatterns/#crossstripes */
+    background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjNDAzYzNmIj48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDBMNCA0Wk00IDBMMCA0WiIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2U9IiMxZTI5MmQiPjwvcGF0aD4KPC9zdmc+");
+  }
+  #outline {
+    font-family:Georgia,Times,"Times New Roman",serif;
+    font-size:13px;
+    margin:2em 1em;
+  }
+  #outline ul {
+    padding:0;
+  }
+  #outline li {
+    list-style-type:none;
+    margin:1em 0;
+  }
+  #outline li > ul {
+    margin-left: 1em;
+  }
+  #outline a,
+  #outline a:visited,
+  #outline a:hover,
+  #outline a:active {
+    line-height:1.2;
+    color:#e8e8e8;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    text-decoration:none;
+    display:block;
+    overflow:hidden;
+    outline:0;
+  }
+  #outline a:hover {
+    color:rgb(0,204,255);
+  }
+  #page-container {
+    background-color:#9e9e9e;
+    /* http://philbit.com/svgpatterns/#thinstripes */
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjOWU5ZTllIj48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDVMNSAwWk02IDRMNCA2Wk0tMSAxTDEgLTFaIiBzdHJva2U9IiM4ODgiIHN0cm9rZS13aWR0aD0iMSI+PC9wYXRoPgo8L3N2Zz4=");
+    -webkit-transition:left 500ms;
+    transition:left 500ms;
+  }
+  .pf {
+    margin: 13px auto;
+    box-shadow: 1px 1px 3px 1px #333;
+    /* Needed by IE to make box-shadow works * https://developer.mozilla.org/en-US/docs/Web/CSS/box-shadow */
+    border-collapse: separate;
+  }
+  .pc.opened { /* used by pdf2htmlEX.js, to show/hide pages */
+    -webkit-animation: fadein 100ms;
+    animation: fadein 100ms; 
+  }
+  .loading-indicator.active {
+    /* 
+     * use 0.01s instead of 0s,
+     * since YUI Compressor will change 0s to 0,
+     * which is not recognized by Firefox
+     */
+    -webkit-animation: swing 1.5s ease-in-out 0.01s infinite alternate none;
+    animation: swing 1.5s ease-in-out 0.01s infinite alternate none;
+  }
+  .checked {
+    background: no-repeat url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3goQDSYgDiGofgAAAslJREFUOMvtlM9LFGEYx7/vvOPM6ywuuyPFihWFBUsdNnA6KLIh+QPx4KWExULdHQ/9A9EfUodYmATDYg/iRewQzklFWxcEBcGgEplDkDtI6sw4PzrIbrOuedBb9MALD7zv+3m+z4/3Bf7bZS2bzQIAcrmcMDExcTeXy10DAFVVAQDksgFUVZ1ljD3yfd+0LOuFpmnvVVW9GHhkZAQcxwkNDQ2FSCQyRMgJxnVdy7KstKZpn7nwha6urqqfTqfPBAJAuVymlNLXoigOhfd5nmeiKL5TVTV+lmIKwAOA7u5u6Lped2BsbOwjY6yf4zgQQkAIAcedaPR9H67r3uYBQFEUFItFtLe332lpaVkUBOHK3t5eRtf1DwAwODiIubk5DA8PM8bYW1EU+wEgCIJqsCAIQAiB7/u253k2BQDDMJBKpa4mEon5eDx+UxAESJL0uK2t7XosFlvSdf0QAEmlUnlRFJ9Waho2Qghc1/U9z3uWz+eX+Wr+lL6SZfleEAQIggA8z6OpqSknimIvYyybSCReMsZ6TislhCAIAti2Dc/zejVNWwCAavN8339j27YbTg0AGGM3WltbP4WhlRWq6Q/btrs1TVsYHx+vNgqKoqBUKn2NRqPFxsbGJzzP05puUlpt0ukyOI6z7zjOwNTU1OLo6CgmJyf/gA3DgKIoWF1d/cIY24/FYgOU0pp0z/Ityzo8Pj5OTk9PbwHA+vp6zWghDC+VSiuRSOQgGo32UErJ38CO42wdHR09LBQK3zKZDDY2NupmFmF4R0cHVlZWlmRZ/iVJUn9FeWWcCCE4ODjYtG27Z2Zm5juAOmgdGAB2d3cBADs7O8uSJN2SZfl+WKlpmpumaT6Yn58vn/fs6XmbhmHMNjc3tzDGFI7jYJrm5vb29sDa2trPC/9aiqJUy5pOp4f6+vqeJ5PJBAB0dnZe/t8NBajx/z37Df5OGX8d13xzAAAAAElFTkSuQmCC);
+  }
+}
+/* Fancy CSS END */
+</style>
+<style type="text/css">
+.ff0{font-family:sans-serif;visibility:hidden;}
+@font-face{font-family:ff1;src:url('data:application/font-woff;base64,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')format("woff");}.ff1{font-family:ff1;line-height:0.960000;font-style:normal;font-weight:normal;visibility:visible;}
+@font-face{font-family:ff2;src:url('data:application/font-woff;base64,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')format("woff");}.ff2{font-family:ff2;line-height:0.959000;font-style:normal;font-weight:normal;visibility:visible;}
+@font-face{font-family:ff3;src:url('data:application/font-woff;base64,d09GRgABAAAAAATEAA0AAAAABtAAAwACAAAAAAAAAAAAAAAAAAAAAAAAAABGRlRNAAAEqAAAABoAAAAcla/2sUdERUYAAASMAAAAGwAAAB4AJwALT1MvMgAAAaQAAABDAAAAVlZLXltjbWFwAAAB/AAAAEwAAAFKAO0Kg2dhc3AAAASEAAAACAAAAAj//wADZ2x5ZgAAAlQAAAA6AAAAPLqS9b5oZWFkAAABMAAAADMAAAA2H/3PLmhoZWEAAAFkAAAAHwAAACQDqAFjaG10eAAAAegAAAAUAAAAFARYAHdsb2NhAAACSAAAAAwAAAAMAAAAHm1heHAAAAGEAAAAHQAAACAASAATbmFtZQAAApAAAAHPAAADBt9ux79wb3N0AAAEYAAAACEAAAAs/032VXicY2BkYGBgZmgOTlwqFM9v85WBm/kFUITh/mPXl3C6/D8bw3ymd0AuBwMTSBQAdiYNfQB4nGNgZGBgevefjYGB8QsDCMxnSGGQZEAGrABnxAQNAHicY2BkYGBgZRBgANEMDExAzAhmO4D5DAAEZwBcAAAAeJxjYGToZvzCwMrAwNTFtIdBkaEHRP/vYXzAYMjIBBRlYGNmgAFGBiQQkOaaAqQUGGqY3v1nA6p8x/ALpgYAaZINTwAB9AAAAAAAAAFNAAAAAQAAARYAd3icY2BgYGaAYBkGRgYQcAHyGMF8FgYNIM0GpBkZmBgUGGr+/wfywfT/x/87oOqBgJGNAc5hZAISTAyogBFiBa0ACw3NJhYAAE6FCXQAAAAAAAAAAAAAAB54nGNgZCj/z8Ywn+kdAz8Dg7CgCB+jkh6jqaCJHaORHON8Ri4hLkYwwXTqTwIPGDAvAFMMDAAukgj8AAB4nG2RwWrbQBRFrxTHEAhtvqA8urLBlkfyItiEQFDxToHGUMhSyIMliCQjjSO86Bd01w/p93RR+iPd9M54ughUA5ozb97cd98MgHf4gQDnr8FvzwHeB7XnEOPgm+cLfAx+eh5hHF55vsRNmHgeM/6ZmcHoiqtf7pTlAB+CzHOI6+Cr5wt8Cr57HjH+x/MlJLzxPMZ1mCJFiwNO6FBhjxIGggkKTDnHWHHcYkZOoDhWpAfU0C6/QM7+BBlnw7OaO5bOOy/c2VK94FozenLKd66GYc01FhyDGxHza/ScWyrvcc/6turAs1ZZ8ESN3tV95X/HyIa5jfP76E5rUkovWzzTuaIW0vZw6qp9aWRSTCVerW5nkii1kodad1WRN5LlptR1brh4kW1bVNqcZHJXGnNYLxbDMER53Udtt7+fzmSoTClPutfdq97Jpm2MPOa1ljTbPsfK1qOlmq0dactatVfT0qzlxtqpD0ejO8nane4YyFwrFfNrLvSuOnL+19fG34V2tx+xI+Gdve3xHLE053/uXinBkiI0t6FtLUmkZO0tEmI1j+eJSpZ4I4RzAvDFme1pqnVva1996apbZWGC7vqqbUSpZaRUIv/X+QslCIJpAHicY2BiYPj/8euh/4EMRgzYACsQMzIwMTAzxAMAw4oFlgAAAAAAAAH//wACeJxjYGRgYOABYjEgZmJgBEIWMAbxGAADygAzAHicY2BgYGQAgqsvs+6B6PuPXV/CaABfBgjoAAA=')format("woff");}.ff3{font-family:ff3;line-height:1.000000;font-style:normal;font-weight:normal;visibility:visible;}
+@font-face{font-family:ff4;src:url('data:application/font-woff;base64,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')format("woff");}.ff4{font-family:ff4;line-height:0.959000;font-style:normal;font-weight:normal;visibility:visible;}
+.m0{transform:matrix(0.325000,0.000000,0.000000,0.325000,0,0);-ms-transform:matrix(0.325000,0.000000,0.000000,0.325000,0,0);-webkit-transform:matrix(0.325000,0.000000,0.000000,0.325000,0,0);}
+.m1{transform:matrix(1.300000,0.000000,0.000000,1.300000,0,0);-ms-transform:matrix(1.300000,0.000000,0.000000,1.300000,0,0);-webkit-transform:matrix(1.300000,0.000000,0.000000,1.300000,0,0);}
+.v0{vertical-align:0.000000px;}
+.ls0{letter-spacing:0.000000px;}
+.sc_{text-shadow:none;}
+.sc0{text-shadow:-0.015em 0 transparent,0 0.015em transparent,0.015em 0 transparent,0 -0.015em  transparent;}
+@media screen and (-webkit-min-device-pixel-ratio:0){
+.sc_{-webkit-text-stroke:0px transparent;}
+.sc0{-webkit-text-stroke:0.015em transparent;text-shadow:none;}
+}
+.ws0{word-spacing:0.000000px;}
+._1a{margin-left:-7.353955px;}
+._11{margin-left:-4.004368px;}
+._8{margin-left:-2.618184px;}
+._5{margin-left:-1.129065px;}
+._2{width:1.749005px;}
+._4{width:3.014418px;}
+._0{width:4.954855px;}
+._1c{width:10.277780px;}
+._6{width:11.476373px;}
+._7{width:12.785465px;}
+._c{width:15.010922px;}
+._10{width:21.821079px;}
+._1{width:32.134069px;}
+._3{width:34.107542px;}
+._1f{width:59.728840px;}
+._1b{width:211.717353px;}
+._a{width:275.093824px;}
+._1d{width:287.275556px;}
+._20{width:295.573768px;}
+._22{width:390.195885px;}
+._21{width:421.663604px;}
+._1e{width:720.551792px;}
+._16{width:909.347570px;}
+._12{width:1052.079135px;}
+._14{width:1083.587570px;}
+._13{width:1136.995570px;}
+._18{width:1169.372306px;}
+._e{width:1213.793408px;}
+._9{width:1218.243819px;}
+._19{width:1228.029926px;}
+._d{width:1284.143702px;}
+._b{width:1494.636547px;}
+._17{width:1500.595671px;}
+._15{width:1602.931155px;}
+._f{width:1765.481989px;}
+.fc0{color:rgb(0,0,0);}
+.fs4{font-size:38.256400px;}
+.fs2{font-size:39.850400px;}
+.fs5{font-size:43.636400px;}
+.fs3{font-size:47.820800px;}
+.fs1{font-size:79.318400px;}
+.fs0{font-size:99.148400px;}
+.y32{bottom:65.206700px;}
+.y31{bottom:82.820400px;}
+.y30{bottom:106.262000px;}
+.y2f{bottom:121.803500px;}
+.y2e{bottom:137.346300px;}
+.y2d{bottom:152.887800px;}
+.y2c{bottom:171.020200px;}
+.y2b{bottom:186.561700px;}
+.y2a{bottom:204.692800px;}
+.y29{bottom:222.825200px;}
+.y28{bottom:241.540000px;}
+.y27{bottom:259.153700px;}
+.y26{bottom:282.596600px;}
+.y25{bottom:300.727700px;}
+.y24{bottom:318.860100px;}
+.y23{bottom:336.992500px;}
+.y22{bottom:352.534000px;}
+.y21{bottom:370.666400px;}
+.y50{bottom:384.586800px;}
+.y20{bottom:388.797500px;}
+.y33{bottom:397.800000px;}
+.y4f{bottom:402.834900px;}
+.y1f{bottom:406.929900px;}
+.y1e{bottom:425.062300px;}
+.y4e{bottom:428.751700px;}
+.y1d{bottom:443.193400px;}
+.y4d{bottom:444.293200px;}
+.y1c{bottom:458.736200px;}
+.y4c{bottom:462.541300px;}
+.y1b{bottom:476.867300px;}
+.y4b{bottom:488.458100px;}
+.y1a{bottom:494.999700px;}
+.y4a{bottom:503.999600px;}
+.y19{bottom:513.132100px;}
+.y49{bottom:522.247700px;}
+.y18{bottom:531.846900px;}
+.y48{bottom:548.163200px;}
+.y17{bottom:549.460600px;}
+.y47{bottom:566.412600px;}
+.y16{bottom:572.902200px;}
+.y15{bottom:588.445000px;}
+.y46{bottom:592.328100px;}
+.y14{bottom:603.986500px;}
+.y45{bottom:610.576200px;}
+.y13{bottom:622.117600px;}
+.y44{bottom:636.493000px;}
+.y12{bottom:640.250000px;}
+.y43{bottom:654.741100px;}
+.y11{bottom:655.791500px;}
+.y10{bottom:673.923900px;}
+.y42{bottom:680.656600px;}
+.yf{bottom:689.465400px;}
+.y41{bottom:698.904700px;}
+.ye{bottom:707.597800px;}
+.y40{bottom:724.760400px;}
+.yd{bottom:725.730200px;}
+.yc{bottom:743.861300px;}
+.y3f{bottom:755.846000px;}
+.yb{bottom:762.491600px;}
+.y3e{bottom:771.387500px;}
+.ya{bottom:780.106600px;}
+.y3d{bottom:790.017800px;}
+.y0{bottom:797.550000px;}
+.y9{bottom:803.371400px;}
+.y3c{bottom:807.631500px;}
+.y8{bottom:829.767900px;}
+.y3b{bottom:831.074400px;}
+.y3a{bottom:846.615900px;}
+.y7{bottom:847.381600px;}
+.y39{bottom:862.157400px;}
+.y6{bottom:871.574600px;}
+.y38{bottom:877.698900px;}
+.y5{bottom:889.188300px;}
+.y37{bottom:896.413700px;}
+.y4{bottom:912.454400px;}
+.y36{bottom:914.027400px;}
+.y35{bottom:937.470300px;}
+.y3{bottom:947.831300px;}
+.y34{bottom:953.011800px;}
+.y1{bottom:959.728900px;}
+.y2{bottom:968.553300px;}
+.h4{height:29.529146px;}
+.h3{height:29.887800px;}
+.h6{height:32.334572px;}
+.h5{height:35.435213px;}
+.h2{height:73.468964px;}
+.h1{height:146.250000px;}
+.h7{height:321.750000px;}
+.h0{height:1029.600000px;}
+.w1{width:702.000000px;}
+.w0{width:795.600000px;}
+.x0{left:46.800000px;}
+.x4{left:60.840000px;}
+.x1{left:74.785100px;}
+.x5{left:80.225600px;}
+.x6{left:92.040000px;}
+.x2{left:415.457900px;}
+.x3{left:494.115700px;}
+@media print{
+.v0{vertical-align:0.000000pt;}
+.ls0{letter-spacing:0.000000pt;}
+.ws0{word-spacing:0.000000pt;}
+._1a{margin-left:-7.542518pt;}
+._11{margin-left:-4.107044pt;}
+._8{margin-left:-2.685317pt;}
+._5{margin-left:-1.158016pt;}
+._2{width:1.793851pt;}
+._4{width:3.091711pt;}
+._0{width:5.081903pt;}
+._1c{width:10.541313pt;}
+._6{width:11.770639pt;}
+._7{width:13.113298pt;}
+._c{width:15.395817pt;}
+._10{width:22.380594pt;}
+._1{width:32.958019pt;}
+._3{width:34.982095pt;}
+._1f{width:61.260349pt;}
+._1b{width:217.146003pt;}
+._a{width:282.147512pt;}
+._1d{width:294.641596pt;}
+._20{width:303.152583pt;}
+._22{width:400.200908pt;}
+._21{width:432.475491pt;}
+._1e{width:739.027479pt;}
+._16{width:932.664174pt;}
+._12{width:1079.055523pt;}
+._14{width:1111.371866pt;}
+._13{width:1166.149302pt;}
+._18{width:1199.356211pt;}
+._e{width:1244.916316pt;}
+._9{width:1249.480840pt;}
+._19{width:1259.517873pt;}
+._d{width:1317.070464pt;}
+._b{width:1532.960561pt;}
+._17{width:1539.072483pt;}
+._15{width:1644.031954pt;}
+._f{width:1810.750758pt;}
+.fs4{font-size:39.237333pt;}
+.fs2{font-size:40.872205pt;}
+.fs5{font-size:44.755282pt;}
+.fs3{font-size:49.046974pt;}
+.fs1{font-size:81.352205pt;}
+.fs0{font-size:101.690667pt;}
+.y32{bottom:66.878667pt;}
+.y31{bottom:84.944000pt;}
+.y30{bottom:108.986667pt;}
+.y2f{bottom:124.926667pt;}
+.y2e{bottom:140.868000pt;}
+.y2d{bottom:156.808000pt;}
+.y2c{bottom:175.405333pt;}
+.y2b{bottom:191.345333pt;}
+.y2a{bottom:209.941333pt;}
+.y29{bottom:228.538667pt;}
+.y28{bottom:247.733333pt;}
+.y27{bottom:265.798667pt;}
+.y26{bottom:289.842667pt;}
+.y25{bottom:308.438667pt;}
+.y24{bottom:327.036000pt;}
+.y23{bottom:345.633333pt;}
+.y22{bottom:361.573333pt;}
+.y21{bottom:380.170667pt;}
+.y50{bottom:394.448000pt;}
+.y20{bottom:398.766667pt;}
+.y33{bottom:408.000000pt;}
+.y4f{bottom:413.164000pt;}
+.y1f{bottom:417.364000pt;}
+.y1e{bottom:435.961333pt;}
+.y4e{bottom:439.745333pt;}
+.y1d{bottom:454.557333pt;}
+.y4d{bottom:455.685333pt;}
+.y1c{bottom:470.498667pt;}
+.y4c{bottom:474.401333pt;}
+.y1b{bottom:489.094667pt;}
+.y4b{bottom:500.982667pt;}
+.y1a{bottom:507.692000pt;}
+.y4a{bottom:516.922667pt;}
+.y19{bottom:526.289333pt;}
+.y49{bottom:535.638667pt;}
+.y18{bottom:545.484000pt;}
+.y48{bottom:562.218667pt;}
+.y17{bottom:563.549333pt;}
+.y47{bottom:580.936000pt;}
+.y16{bottom:587.592000pt;}
+.y15{bottom:603.533333pt;}
+.y46{bottom:607.516000pt;}
+.y14{bottom:619.473333pt;}
+.y45{bottom:626.232000pt;}
+.y13{bottom:638.069333pt;}
+.y44{bottom:652.813333pt;}
+.y12{bottom:656.666667pt;}
+.y43{bottom:671.529333pt;}
+.y11{bottom:672.606667pt;}
+.y10{bottom:691.204000pt;}
+.y42{bottom:698.109333pt;}
+.yf{bottom:707.144000pt;}
+.y41{bottom:716.825333pt;}
+.ye{bottom:725.741333pt;}
+.y40{bottom:743.344000pt;}
+.yd{bottom:744.338667pt;}
+.yc{bottom:762.934667pt;}
+.y3f{bottom:775.226667pt;}
+.yb{bottom:782.042667pt;}
+.y3e{bottom:791.166667pt;}
+.ya{bottom:800.109333pt;}
+.y3d{bottom:810.274667pt;}
+.y0{bottom:818.000000pt;}
+.y9{bottom:823.970667pt;}
+.y3c{bottom:828.340000pt;}
+.y8{bottom:851.044000pt;}
+.y3b{bottom:852.384000pt;}
+.y3a{bottom:868.324000pt;}
+.y7{bottom:869.109333pt;}
+.y39{bottom:884.264000pt;}
+.y6{bottom:893.922667pt;}
+.y38{bottom:900.204000pt;}
+.y5{bottom:911.988000pt;}
+.y37{bottom:919.398667pt;}
+.y4{bottom:935.850667pt;}
+.y36{bottom:937.464000pt;}
+.y35{bottom:961.508000pt;}
+.y3{bottom:972.134667pt;}
+.y34{bottom:977.448000pt;}
+.y1{bottom:984.337333pt;}
+.y2{bottom:993.388000pt;}
+.h4{height:30.286304pt;}
+.h3{height:30.654154pt;}
+.h6{height:33.163664pt;}
+.h5{height:36.343808pt;}
+.h2{height:75.352784pt;}
+.h1{height:150.000000pt;}
+.h7{height:330.000000pt;}
+.h0{height:1056.000000pt;}
+.w1{width:720.000000pt;}
+.w0{width:816.000000pt;}
+.x0{left:48.000000pt;}
+.x4{left:62.400000pt;}
+.x1{left:76.702667pt;}
+.x5{left:82.282667pt;}
+.x6{left:94.400000pt;}
+.x2{left:426.110667pt;}
+.x3{left:506.785333pt;}
+}
+</style>
+<script>
+/*
+ Copyright 2012 Mozilla Foundation 
+ Copyright 2013 Lu Wang <coolwanglu@gmail.com>
+ Apachine License Version 2.0 
+*/
+(function(){function b(a,b,e,f){var c=(a.className||"").split(/\s+/g);""===c[0]&&c.shift();var d=c.indexOf(b);0>d&&e&&c.push(b);0<=d&&f&&c.splice(d,1);a.className=c.join(" ");return 0<=d}if(!("classList"in document.createElement("div"))){var e={add:function(a){b(this.element,a,!0,!1)},contains:function(a){return b(this.element,a,!1,!1)},remove:function(a){b(this.element,a,!1,!0)},toggle:function(a){b(this.element,a,!0,!0)}};Object.defineProperty(HTMLElement.prototype,"classList",{get:function(){if(this._classList)return this._classList;
+var a=Object.create(e,{element:{value:this,writable:!1,enumerable:!0}});Object.defineProperty(this,"_classList",{value:a,writable:!1,enumerable:!1});return a},enumerable:!0})}})();
+</script>
+<script>
+/* vim: set shiftwidth=2 tabstop=2 autoindent cindent expandtab filetype=javascript : */
+/** 
+ * @license pdf2htmlEX.js: Core UI functions for pdf2htmlEX 
+ * Copyright 2012,2013 Lu Wang <coolwanglu@gmail.com> and other contributors 
+ * https://github.com/coolwanglu/pdf2htmlEX/blob/master/share/LICENSE 
+ */
+
+/*
+ * Attention:
+ * This files is to be optimized by closure-compiler, 
+ * so pay attention to the forms of property names:
+ *
+ * string/bracket form is safe, won't be optimized:
+ * var obj={ 'a':'b' }; obj['a'] = 'b';
+ * name/dot form will be optimized, the name is likely to be modified:
+ * var obj={ a:'b' }; obj.a = 'b';
+ *
+ * Either form can be used for internal objects, 
+ * but must be consistent for each one respectively.
+ *
+ * string/bracket form must be used for external objects
+ * e.g. DEFAULT_CONFIG, object stored in page-data
+ * property names are part of the `protocol` in these cases.
+ *
+ */
+
+'use strict';
+
+var pdf2htmlEX = window['pdf2htmlEX'] = window['pdf2htmlEX'] || {};
+
+/** 
+ * @const 
+ * @struct
+ */
+var CSS_CLASS_NAMES = {
+  page_frame       : 'pf',
+  page_content_box : 'pc',
+  page_data        : 'pi',
+  background_image : 'bi',
+  link             : 'l',
+  input_radio      : 'ir',
+  __dummy__        : 'no comma'
+};
+
+/** 
+ * configurations of Viewer
+ * @const 
+ * @dict
+ */
+var DEFAULT_CONFIG = {
+  // id of the element to put the pages in
+  'container_id' : 'page-container',
+  // id of the element for sidebar (to open and close)
+  'sidebar_id' : 'sidebar',
+  // id of the element for outline
+  'outline_id' : 'outline',
+  // class for the loading indicator
+  'loading_indicator_cls' : 'loading-indicator',
+  // How many page shall we preload that are below the last visible page
+  'preload_pages' : 3,
+  // how many ms should we wait before actually rendering the pages and after a scroll event
+  'render_timeout' : 100,
+  // zoom ratio step for each zoom in/out event
+  'scale_step' : 0.9,
+  // register global key handler, allowing navigation by keyboard
+  'key_handler' : true,
+  // register hashchange handler, navigate to the location specified by the hash
+  'hashchange_handler' : true,
+  // register view history handler, allowing going back to the previous location
+  'view_history_handler' : true,
+
+  '__dummy__'        : 'no comma'
+};
+
+/** @const */
+var EPS = 1e-6;
+
+/************************************/
+/* utility function */
+/**
+ * @param{Array.<number>} ctm
+ */
+function invert(ctm) {
+  var det = ctm[0] * ctm[3] - ctm[1] * ctm[2];
+  return [ ctm[3] / det
+          ,-ctm[1] / det
+          ,-ctm[2] / det
+          ,ctm[0] / det
+          ,(ctm[2] * ctm[5] - ctm[3] * ctm[4]) / det
+          ,(ctm[1] * ctm[4] - ctm[0] * ctm[5]) / det
+        ];
+};
+/**
+ * @param{Array.<number>} ctm
+ * @param{Array.<number>} pos
+ */
+function transform(ctm, pos) {
+  return [ctm[0] * pos[0] + ctm[2] * pos[1] + ctm[4]
+         ,ctm[1] * pos[0] + ctm[3] * pos[1] + ctm[5]];
+};
+
+/**
+ * @param{Element} ele
+ */
+function get_page_number(ele) {
+  return parseInt(ele.getAttribute('data-page-no'), 16);
+};
+
+/**
+ * @param{NodeList} eles
+ */
+function disable_dragstart(eles) {
+  for (var i = 0, l = eles.length; i < l; ++i) {
+    eles[i].addEventListener('dragstart', function() {
+      return false;
+    }, false);
+  }
+};
+
+/**
+ * @param{...Object} var_args
+ */
+function clone_and_extend_objs(var_args) {
+  var result_obj = {};
+  for (var i = 0, l = arguments.length; i < l; ++i) {
+    var cur_obj = arguments[i];
+    for (var k in cur_obj) {
+      if (cur_obj.hasOwnProperty(k)) {
+        result_obj[k] = cur_obj[k];
+      }
+    }
+  }
+  return result_obj;
+};
+
+/** 
+ * @constructor 
+ * @param{Element} page The element for the page
+ */
+function Page(page) {
+  if (!page) return;
+
+  this.loaded = false;
+  this.shown = false;
+  this.page = page; // page frame element
+
+  this.num = get_page_number(page);
+
+  // page size
+  // Need to make rescale work when page_content_box is not loaded, yet
+  this.original_height = page.clientHeight;     
+  this.original_width = page.clientWidth;
+
+  // content box
+  var content_box = page.getElementsByClassName(CSS_CLASS_NAMES.page_content_box)[0];
+
+  // if page is loaded
+  if (content_box) {
+    this.content_box = content_box;
+    /*
+     * scale ratios
+     *
+     * original_scale : the first one
+     * cur_scale : currently using
+     */
+    this.original_scale = this.cur_scale = this.original_height / content_box.clientHeight;
+    this.page_data = JSON.parse(page.getElementsByClassName(CSS_CLASS_NAMES.page_data)[0].getAttribute('data-data'));
+
+    this.ctm = this.page_data['ctm'];
+    this.ictm = invert(this.ctm);
+
+    this.loaded = true;
+  }
+};
+Page.prototype = {
+  /* hide & show are for contents, the page frame is still there */
+  hide : function(){
+    if (this.loaded && this.shown) {
+      this.content_box.classList.remove('opened');
+      this.shown = false;
+    }
+  },
+  show : function(){
+    if (this.loaded && !this.shown) {
+      this.content_box.classList.add('opened');
+      this.shown = true;
+    }
+  },
+  /**
+   * @param{number} ratio
+   */
+  rescale : function(ratio) {
+    if (ratio === 0) {
+      // reset scale
+      this.cur_scale = this.original_scale;
+    } else {
+      this.cur_scale = ratio;
+    }
+
+    // scale the content box
+    if (this.loaded) {
+      var cbs = this.content_box.style;
+      cbs.msTransform = cbs.webkitTransform = cbs.transform = 'scale('+this.cur_scale.toFixed(3)+')';
+    }
+
+    // stretch the page frame to hold the place
+    {
+      var ps = this.page.style;
+      ps.height = (this.original_height * this.cur_scale) + 'px';
+      ps.width = (this.original_width * this.cur_scale) + 'px';
+    }
+  },
+  /*
+   * return the coordinate of the top-left corner of container
+   * in our coordinate system
+   * assuming that p.parentNode === p.offsetParent
+   */
+  view_position : function () {
+    var p = this.page;
+    var c = p.parentNode;
+    return [c.scrollLeft - p.offsetLeft - p.clientLeft
+           ,c.scrollTop - p.offsetTop - p.clientTop];
+  },
+  height : function () {
+    return this.page.clientHeight;
+  },
+  width : function () {
+    return this.page.clientWidth;
+  }
+};
+
+/** 
+ * @constructor
+ * @param{Object=} config
+ */
+function Viewer(config) {
+  this.config = clone_and_extend_objs(DEFAULT_CONFIG, (arguments.length > 0 ? config : {}));
+  this.pages_loading = [];
+  this.init_before_loading_content();
+
+  var self = this;
+  document.addEventListener('DOMContentLoaded', function(){
+    self.init_after_loading_content();
+  }, false);
+};
+
+Viewer.prototype = {
+  scale : 1,
+  /* 
+   * index of the active page (the one with largest visible area)
+   * which estimates the page currently being viewed
+   */
+  cur_page_idx : 0,
+
+  /*
+   * index of the first visible page
+   * used when determining current view
+   */
+  first_page_idx : 0,
+
+  init_before_loading_content : function() {
+    /* hide all pages before loading, will reveal only visible ones later */
+    this.pre_hide_pages();
+  },
+
+  initialize_radio_button : function() {
+    var elements = document.getElementsByClassName(CSS_CLASS_NAMES.input_radio);
+    
+    for(var i = 0; i < elements.length; i++) {
+      var r = elements[i];
+
+      r.addEventListener('click', function() {
+        this.classList.toggle("checked");
+      });
+    }
+  },
+
+  init_after_loading_content : function() {
+    this.sidebar = document.getElementById(this.config['sidebar_id']);
+    this.outline = document.getElementById(this.config['outline_id']);
+    this.container = document.getElementById(this.config['container_id']);
+    this.loading_indicator = document.getElementsByClassName(this.config['loading_indicator_cls'])[0];
+
+    
+    {
+      // Open the outline if nonempty
+      var empty = true;
+      var nodes = this.outline.childNodes;
+      for (var i = 0, l = nodes.length; i < l; ++i) {
+        var cur_node = nodes[i];
+        if (cur_node.nodeName.toLowerCase() === 'ul') {
+          empty = false;
+          break;
+        }
+      }
+      if (!empty)
+        this.sidebar.classList.add('opened');
+    }
+
+    this.find_pages();
+    // do nothing if there's nothing
+    if(this.pages.length == 0) return;
+
+    // disable dragging of background images
+    disable_dragstart(document.getElementsByClassName(CSS_CLASS_NAMES.background_image));
+
+    if (this.config['key_handler'])
+      this.register_key_handler();
+
+    var self = this;
+
+    if (this.config['hashchange_handler']) {
+      window.addEventListener('hashchange', function(e) {
+        self.navigate_to_dest(document.location.hash.substring(1));
+      }, false);
+    }
+
+    if (this.config['view_history_handler']) {
+      window.addEventListener('popstate', function(e) {
+        if(e.state) self.navigate_to_dest(e.state);
+      }, false);
+    }
+
+    // register schedule rendering
+    // renew old schedules since scroll() may be called frequently
+    this.container.addEventListener('scroll', function() {
+      self.update_page_idx();
+      self.schedule_render(true);
+    }, false);
+
+    // handle links
+    [this.container, this.outline].forEach(function(ele) {
+      ele.addEventListener('click', self.link_handler.bind(self), false);
+    });
+
+    this.initialize_radio_button();
+    this.render();
+  },
+
+  /*
+   * set up this.pages and this.page_map
+   * pages is an array holding all the Page objects
+   * page-Map maps an original page number (in PDF) to the corresponding index in page
+   */
+  find_pages : function() {
+    var new_pages = [];
+    var new_page_map = {};
+    var nodes = this.container.childNodes;
+    for (var i = 0, l = nodes.length; i < l; ++i) {
+      var cur_node = nodes[i];
+      if ((cur_node.nodeType === Node.ELEMENT_NODE)
+          && cur_node.classList.contains(CSS_CLASS_NAMES.page_frame)) {
+        var p = new Page(cur_node);
+        new_pages.push(p);
+        new_page_map[p.num] = new_pages.length - 1;
+      }
+    }
+    this.pages = new_pages;
+    this.page_map = new_page_map;
+  },
+
+  /**
+   * @param{number} idx
+   * @param{number=} pages_to_preload
+   * @param{function(Page)=} callback
+   *
+   * TODO: remove callback -> promise ?
+   */
+  load_page : function(idx, pages_to_preload, callback) {
+    var pages = this.pages;
+    if (idx >= pages.length)
+      return;  // Page does not exist
+
+    var cur_page = pages[idx];
+    if (cur_page.loaded)
+      return;  // Page is loaded
+
+    if (this.pages_loading[idx])
+      return;  // Page is already loading
+
+    var cur_page_ele = cur_page.page;
+    var url = cur_page_ele.getAttribute('data-page-url');
+    if (url) {
+      this.pages_loading[idx] = true;       // set semaphore
+
+      // add a copy of the loading indicator if not already present
+      var new_loading_indicator = cur_page_ele.getElementsByClassName(this.config['loading_indicator_cls'])[0];
+      if (typeof new_loading_indicator === 'undefined'){
+        new_loading_indicator = this.loading_indicator.cloneNode(true);
+        new_loading_indicator.classList.add('active');
+        cur_page_ele.appendChild(new_loading_indicator);
+      }
+
+      // load data
+      {
+        var self = this;
+        var _idx = idx;
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.onload = function(){
+          if (xhr.status === 200 || xhr.status === 0) {
+            // find the page element in the data
+            var div = document.createElement('div');
+            div.innerHTML = xhr.responseText;
+
+            var new_page = null;
+            var nodes = div.childNodes;
+            for (var i = 0, l = nodes.length; i < l; ++i) {
+              var cur_node = nodes[i];
+              if ((cur_node.nodeType === Node.ELEMENT_NODE)
+                  && cur_node.classList.contains(CSS_CLASS_NAMES.page_frame)) {
+                new_page = cur_node;
+                break;
+              }
+            }
+
+            // replace the old page with loaded data
+            // the loading indicator on this page should also be destroyed
+            var p = self.pages[_idx];
+            self.container.replaceChild(new_page, p.page);
+            p = new Page(new_page);
+            self.pages[_idx] = p;
+
+            p.hide();
+            p.rescale(self.scale);
+
+            // disable background image dragging
+            disable_dragstart(new_page.getElementsByClassName(CSS_CLASS_NAMES.background_image));
+
+            self.schedule_render(false);
+
+            if (callback){ callback(p); }
+          }
+
+          // Reset loading token
+          delete self.pages_loading[_idx];
+        };
+        xhr.send(null);
+      }
+    }
+    // Concurrent prefetch of the next pages
+    if (pages_to_preload === undefined)
+      pages_to_preload = this.config['preload_pages'];
+
+    if (--pages_to_preload > 0) {
+      var self = this;
+      setTimeout(function() {
+        self.load_page(idx+1, pages_to_preload);
+      },0);
+    }
+  },
+
+  /*
+   * Hide all pages that have no 'opened' class
+   * The 'opened' class will be added to visible pages by JavaScript
+   * We cannot add this in the default CSS because JavaScript may be disabled
+   */
+  pre_hide_pages : function() {
+    /* pages might have not been loaded yet, so add a CSS rule */
+    var s = '@media screen{.'+CSS_CLASS_NAMES.page_content_box+'{display:none;}}';
+    var n = document.createElement('style');
+    if (n.styleSheet) {
+      n.styleSheet.cssText = s;
+    } else {
+      n.appendChild(document.createTextNode(s));
+    }
+    document.head.appendChild(n);
+  },
+
+  /*
+   * show visible pages and hide invisible pages
+   */
+  render : function () {
+    var container = this.container;
+    /* 
+     * show the pages that are 'nearly' visible -- it's right above or below the container
+     *
+     * all the y values are in the all-page element's coordinate system
+     */
+    var container_min_y = container.scrollTop;
+    var container_height = container.clientHeight;
+    var container_max_y = container_min_y + container_height;
+    var visible_min_y = container_min_y - container_height;
+    var visible_max_y = container_max_y + container_height;
+
+    var cur_page_fully_visible = false;
+    var cur_page_idx = this.cur_page_idx;
+    var max_visible_page_idx = cur_page_idx;
+    var max_visible_ratio = 0.0;
+
+    var pl = this.pages;
+    for (var i = 0, l = pl.length; i < l; ++i) {
+      var cur_page = pl[i];
+      var cur_page_ele = cur_page.page;
+      var page_min_y = cur_page_ele.offsetTop + cur_page_ele.clientTop;
+      var page_height = cur_page_ele.clientHeight;
+      var page_max_y = page_min_y + page_height;
+      if ((page_min_y <= visible_max_y) && (page_max_y >= visible_min_y))
+      {
+        // cur_page is 'nearly' visible, show it or load it
+        if (cur_page.loaded) {
+          cur_page.show();
+        } else {
+          this.load_page(i);
+        }
+      } else {
+        cur_page.hide();
+      }
+    }
+  },
+  /*
+   * update cur_page_idx and first_page_idx
+   * normally called upon scrolling
+   */
+  update_page_idx: function () {
+    var pages = this.pages;
+    var pages_len = pages.length;
+    // there is no chance that cur_page_idx or first_page_idx is modified
+    if (pages_len < 2) return;
+   
+    var container = this.container;
+    var container_min_y = container.scrollTop;
+    var container_max_y = container_min_y + container.clientHeight;
+
+    // binary search for the first page
+    // whose bottom border is below the top border of the container
+    var first_idx = -1;
+    var last_idx = pages_len;
+    var rest_len = last_idx - first_idx;
+    // TODO: use current first_page_idx as a hint?
+    while(rest_len > 1) {
+      var idx = first_idx + Math.floor(rest_len / 2);
+      var cur_page_ele = pages[idx].page;
+      if (cur_page_ele.offsetTop + cur_page_ele.clientTop + cur_page_ele.clientHeight >= container_min_y) {
+        last_idx = idx;
+      } else {
+        first_idx = idx;
+      }
+      rest_len = last_idx - first_idx;
+    }
+    
+    /*
+     * with malformed settings it is possible that no page is visible, e.g.
+     * - the container is to thin, which lies in the margin between two pages
+     * - all pages are completely above or below the container
+     * but we just assume that they won't happen.
+     */
+    this.first_page_idx = last_idx;
+
+    // find the page with largest visible area
+    var cur_page_idx = this.cur_page_idx;
+    var max_visible_page_idx = cur_page_idx;
+    var max_visible_ratio = 0.0;
+
+    for(var i = last_idx; i < pages_len; ++i) {
+      var cur_page_ele = pages[i].page;
+      var page_min_y = cur_page_ele.offsetTop + cur_page_ele.clientTop;
+      var page_height = cur_page_ele.clientHeight;
+      var page_max_y = page_min_y + page_height;
+      if (page_min_y > container_max_y) break;
+
+      // check the visible fraction of the page
+      var page_visible_ratio = ( Math.min(container_max_y, page_max_y) 
+                                 - Math.max(container_min_y, page_min_y)
+                               ) / page_height;
+
+      // stay with the current page if it is still fully visible
+      if ((i === cur_page_idx) && (Math.abs(page_visible_ratio - 1.0) <= EPS)) {
+        max_visible_page_idx = cur_page_idx;
+        break;
+      }
+
+      if (page_visible_ratio > max_visible_ratio) {
+        max_visible_ratio = page_visible_ratio;
+        max_visible_page_idx = i;
+      }
+    }
+
+    this.cur_page_idx = max_visible_page_idx;
+  },
+
+  /**
+   * @param{boolean} renew renew the existing schedule instead of using the old one
+   */
+  schedule_render : function(renew) {
+    if (this.render_timer !== undefined) {
+      if (!renew) return;
+      clearTimeout(this.render_timer);
+    }
+
+    var self = this;
+    this.render_timer = setTimeout(function () {
+      /*
+       * render() may trigger load_page(), which may in turn trigger another render()
+       * so delete render_timer first
+       */
+      delete self.render_timer;
+      self.render();
+    }, this.config['render_timeout']);
+  },
+
+  /*
+   * Handling key events, zooming, scrolling etc.
+   */
+  register_key_handler: function () {
+    /* 
+     * When user try to zoom in/out using ctrl + +/- or mouse wheel
+     * handle this and prevent the default behaviours
+     *
+     * Code credit to PDF.js
+     */
+    var self = this;
+
+    // Firefox specific event, so that we can prevent browser from zooming
+    window.addEventListener('DOMMouseScroll', function(e) {
+      if (e.ctrlKey) {
+        e.preventDefault();
+        var container = self.container;
+        var rect = container.getBoundingClientRect();
+        var fixed_point = [e.clientX - rect['left'] - container.clientLeft
+                          ,e.clientY - rect['top'] - container.clientTop];
+        self.rescale(Math.pow(self.config['scale_step'], e.detail), true, fixed_point);
+      }
+    }, false);
+
+    window.addEventListener('keydown', function(e) {
+      var handled = false;
+      /*
+      var cmd = (e.ctrlKey ? 1 : 0)
+                | (e.altKey ? 2 : 0)
+                | (e.shiftKey ? 4 : 0)
+                | (e.metaKey ? 8 : 0)
+                ;
+                */
+      var with_ctrl = e.ctrlKey || e.metaKey;
+      var with_alt = e.altKey;
+      switch (e.keyCode) {
+        case 61: // FF/Mac '='
+        case 107: // FF '+' and '='
+        case 187: // Chrome '+'
+          if (with_ctrl){
+            self.rescale(1.0 / self.config['scale_step'], true);
+            handled = true;
+          }
+          break;
+        case 173: // FF/Mac '-'
+        case 109: // FF '-'
+        case 189: // Chrome '-'
+          if (with_ctrl){
+            self.rescale(self.config['scale_step'], true);
+            handled = true;
+          }
+          break;
+        case 48: // '0'
+          if (with_ctrl){
+            self.rescale(0, false);
+            handled = true;
+          }
+          break;
+        case 33: // Page UP:
+          if (with_alt) { // alt-pageup    -> scroll one page up
+            self.scroll_to(self.cur_page_idx - 1);
+          } else { // pageup        -> scroll one screen up
+            self.container.scrollTop -= self.container.clientHeight;
+          }
+          handled = true;
+          break;
+        case 34: // Page DOWN
+          if (with_alt) { // alt-pagedown  -> scroll one page down
+            self.scroll_to(self.cur_page_idx + 1);
+          } else { // pagedown      -> scroll one screen down
+            self.container.scrollTop += self.container.clientHeight;
+          }
+          handled = true;
+          break;
+        case 35: // End
+          self.container.scrollTop = self.container.scrollHeight;
+          handled = true;
+          break;
+        case 36: // Home
+          self.container.scrollTop = 0;
+          handled = true;
+          break;
+      }
+      if (handled) {
+        e.preventDefault();
+        return;
+      }
+    }, false);
+  },
+
+  /**
+   * @param{number} ratio
+   * @param{boolean} is_relative
+   * @param{Array.<number>=} fixed_point preserve the position (relative to the top-left corner of the viewer) after rescaling
+   */
+  rescale : function (ratio, is_relative, fixed_point) {
+    var old_scale = this.scale;
+    var new_scale = old_scale;
+    // set new scale
+    if (ratio === 0) {
+      new_scale = 1;
+      is_relative = false;
+    } else if (is_relative)
+      new_scale *= ratio;
+    else
+      new_scale = ratio;
+
+    this.scale = new_scale;
+
+    if (!fixed_point)
+      fixed_point = [0,0];
+
+    // translate fixed_point to the coordinate system of all pages
+    var container = this.container;
+    fixed_point[0] += container.scrollLeft;
+    fixed_point[1] += container.scrollTop;
+
+    // find the visible page that contains the fixed point
+    // if the fixed point lies between two pages (including their borders), it's contained in the first one
+    var pl = this.pages;
+    var pl_len = pl.length;
+    for (var i = this.first_page_idx; i < pl_len; ++i) {
+      var p = pl[i].page;
+      if (p.offsetTop + p.clientTop >= fixed_point[1])
+        break;
+    }
+    var fixed_point_page_idx = i - 1;
+
+    // determine the new scroll position
+    // each-value consists of two parts, one inside the page, which is affected by rescaling,
+    // the other is outside, (e.g. borders and margins), which is not affected
+
+    // if the fixed_point is above the first page, use the first page as the reference
+    if (fixed_point_page_idx < 0) 
+      fixed_point_page_idx = 0;
+
+    var fp_p = pl[fixed_point_page_idx].page;
+    var fp_p_width = fp_p.clientWidth;
+    var fp_p_height = fp_p.clientHeight;
+
+    var fp_x_ref = fp_p.offsetLeft + fp_p.clientLeft;
+    var fp_x_inside = fixed_point[0] - fp_x_ref;
+    if (fp_x_inside < 0)
+      fp_x_inside = 0;
+    else if (fp_x_inside > fp_p_width)
+      fp_x_inside = fp_p_width;
+
+    var fp_y_ref = fp_p.offsetTop + fp_p.clientTop;
+    var fp_y_inside = fixed_point[1] - fp_y_ref;
+    if (fp_y_inside < 0)
+      fp_y_inside = 0;
+    else if (fp_y_inside > fp_p_height)
+      fp_y_inside = fp_p_height;
+
+    // Rescale pages
+    for (var i = 0; i < pl_len; ++i) 
+        pl[i].rescale(new_scale);  
+
+    // Correct container scroll to keep view aligned while zooming
+    container.scrollLeft += fp_x_inside / old_scale * new_scale + fp_p.offsetLeft + fp_p.clientLeft - fp_x_inside - fp_x_ref;
+    container.scrollTop += fp_y_inside / old_scale * new_scale + fp_p.offsetTop + fp_p.clientTop - fp_y_inside - fp_y_ref;
+
+    // some pages' visibility may be toggled, wait for next render()
+    // renew old schedules since rescale() may be called frequently
+    this.schedule_render(true);
+  },
+
+  fit_width : function () {
+    var page_idx = this.cur_page_idx;
+    this.rescale(this.container.clientWidth / this.pages[page_idx].width(), true);
+    this.scroll_to(page_idx);
+  },
+
+  fit_height : function () {
+    var page_idx = this.cur_page_idx;
+    this.rescale(this.container.clientHeight / this.pages[page_idx].height(), true);
+    this.scroll_to(page_idx);
+  },
+  /**
+   * @param{Node} ele
+   */
+  get_containing_page : function(ele) {
+    /* get the page obj containing obj */
+    while(ele) {
+      if ((ele.nodeType === Node.ELEMENT_NODE)
+          && ele.classList.contains(CSS_CLASS_NAMES.page_frame)) {
+        /*
+         * Get original page number and map it to index of pages
+         * TODO: store the index on the dom element
+         */
+        var pn = get_page_number(/** @type{Element} */(ele));
+        var pm = this.page_map;
+        return (pn in pm) ? this.pages[pm[pn]] : null;
+      }
+      ele = ele.parentNode;
+    }
+    return null;
+  },
+
+  /**
+   * @param{Event} e
+   */
+  link_handler : function (e) {
+    var target = /** @type{Node} */(e.target);
+    var detail_str = /** @type{string} */ (target.getAttribute('data-dest-detail'));
+    if (!detail_str) return;
+
+    if (this.config['view_history_handler']) {
+      try {
+        var cur_hash = this.get_current_view_hash();
+        window.history.replaceState(cur_hash, '', '#' + cur_hash);
+        window.history.pushState(detail_str, '', '#' + detail_str);
+      } catch(ex) { }
+    }
+    this.navigate_to_dest(detail_str, this.get_containing_page(target));
+    e.preventDefault();
+  },
+
+  /**
+   * @param{string} detail_str may come from user provided hashtag, need sanitizing
+   * @param{Page=} src_page page containing the source event (e.g. link)
+   */
+  navigate_to_dest : function(detail_str, src_page) {
+    try {
+      var detail = JSON.parse(detail_str);
+    } catch(e) {
+      return;
+    }
+
+    if(!(detail instanceof Array)) return;
+
+    var target_page_no = detail[0];
+    var page_map = this.page_map;
+    if (!(target_page_no in page_map)) return;
+    var target_page_idx = page_map[target_page_no];
+    var target_page = this.pages[target_page_idx];
+
+    for (var i = 2, l = detail.length; i < l; ++i) {
+      var d = detail[i];
+      if(!((d === null) || (typeof d === 'number')))
+        return;
+    }
+
+    while(detail.length < 6)
+      detail.push(null);
+
+    // cur_page might be undefined, e.g. from Outline
+    var cur_page = src_page || this.pages[this.cur_page_idx];
+
+    var cur_pos = cur_page.view_position();
+    cur_pos = transform(cur_page.ictm, [cur_pos[0], cur_page.height()-cur_pos[1]]);
+
+    var zoom = this.scale;
+    var pos = [0,0];
+    var upside_down = true;
+    var ok = false;
+
+    // position specified in `detail` are in the raw coordinate system of the page (unscaled)
+    var scale = this.scale;
+    // TODO: fitb*
+    // TODO: BBox
+    switch(detail[1]) {
+      case 'XYZ':
+        pos = [ (detail[2] === null) ? cur_pos[0] : detail[2] * scale
+              , (detail[3] === null) ? cur_pos[1] : detail[3] * scale ];
+        zoom = detail[4];
+        if ((zoom === null) || (zoom === 0))
+          zoom = this.scale;
+        ok = true;
+        break;
+      case 'Fit':
+      case 'FitB':
+        pos = [0,0];
+        ok = true;
+        break;
+      case 'FitH':
+      case 'FitBH':
+        pos = [0, (detail[2] === null) ? cur_pos[1] : detail[2] * scale];
+        ok = true;
+        break;
+      case 'FitV':
+      case 'FitBV':
+        pos = [(detail[2] === null) ? cur_pos[0] : detail[2] * scale, 0];
+        ok = true;
+        break;
+      case 'FitR':
+        /* locate the top-left corner of the rectangle */
+        // TODO
+        pos = [detail[2] * scale, detail[5] * scale];
+        upside_down = false;
+        ok = true;
+        break;
+      default:
+        break;
+    }
+
+    if (!ok) return;
+
+    this.rescale(zoom, false);
+
+    var self = this;
+    /**
+     * page should have type Page
+     * @param{Page} page 
+     */
+    var transform_and_scroll = function(page) {
+      pos = transform(page.ctm, pos);
+      if (upside_down) {
+        pos[1] = page.height() - pos[1];
+      }
+      self.scroll_to(target_page_idx, pos);
+    };
+
+    if (target_page.loaded) {
+      transform_and_scroll(target_page);
+    } else {
+      // TODO: scroll_to may finish before load_page
+
+      // Scroll to the exact position once loaded.
+      this.load_page(target_page_idx, undefined, transform_and_scroll);
+
+      // In the meantime page gets loaded, scroll approximately position for maximum responsiveness.
+      this.scroll_to(target_page_idx);
+    }
+  }, 
+
+  /**
+   * @param{number} page_idx
+   * @param{Array.<number>=} pos [x,y] where (0,0) is the top-left corner
+   */
+  scroll_to : function(page_idx, pos) {
+    var pl = this.pages;
+    if ((page_idx < 0) || (page_idx >= pl.length)) return;
+    var target_page = pl[page_idx];
+    var cur_target_pos = target_page.view_position();
+
+    if (pos === undefined)
+      pos = [0,0];
+
+    var container = this.container;
+    container.scrollLeft += pos[0] - cur_target_pos[0];
+    container.scrollTop += pos[1] - cur_target_pos[1];
+  },
+
+  /**
+   * generate the hash for the current view
+   */
+  get_current_view_hash : function() {
+    var detail = [];
+    var cur_page = this.pages[this.cur_page_idx];
+
+    detail.push(cur_page.num);
+    detail.push('XYZ');
+
+    var cur_pos = cur_page.view_position();
+    cur_pos = transform(cur_page.ictm, [cur_pos[0], cur_page.height()-cur_pos[1]]);
+    detail.push(cur_pos[0] / this.scale);
+    detail.push(cur_pos[1] / this.scale);
+    
+    detail.push(this.scale);
+
+    return JSON.stringify(detail);
+  }
+};
+
+// export pdf2htmlEX.Viewer
+pdf2htmlEX['Viewer'] = Viewer;
+</script>
+<script>
+try{
+pdf2htmlEX.defaultViewer = new pdf2htmlEX.Viewer({});
+}catch(e){}
+</script>
+<title></title>
+</head>
+<body>
+<div id="sidebar">
+<div id="outline">
+<ul><li><a class="l" href="#pf1" data-dest-detail='[1,"XYZ",36,711.851,null]'>Education</a></li><li><a class="l" href="#pf1" data-dest-detail='[1,"XYZ",36,624.753,null]'>Experience</a></li><li><a class="l" href="#pf2" data-dest-detail='[2,"XYZ",36,565.254,null]'>Projects</a></li></ul></div>
+</div>
+<div id="page-container">
+<div id="pf1" class="pf w0 h0" data-page-no="1"><div class="pc pc1 w0 h0"><img class="bi x0 y0 w1 h1" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABDgAAADhCAIAAACiDJIsAAAACXBIWXMAABYlAAAWJQFJUiTwAAAEJUlEQVR42u3agQnAIBRDQeP+O8clCv2tdyNEEB+YtgsAuFsSI/B73r0fu5ccGAAAMM02AQAAIFQAAACECgAAIFQAAACECgAAIFQAAACECgAAIFQAAACECgAAgFABAACECgAAgFABAACECgAAgFABAACECgAAgFABAACECgAAgFABAAAQKgAAgFABAAAQKgAAgFABAAAQKgAAgFABAAAQKgAAAEIFAAAQKgAAAEIFAAAQKgAAAEIFAAAQKgAAAEIFAAAQKgAAAEIFAABAqAAAAEIFAABAqAAAAEIFAABAqAAAAEIFAABAqAAAAAgVAABAqAAAAAgVAABAqAAAAAgVAABAqAAAAAgVAABAqAAAAAgVAAAAoQIAAAgVAAAAoQIAAAgVAAAAoQIAAAAAAPCatLUCAAAwiq9fAACAUAEAABAqAACAUAEAABAqAACAUAEAABAqAACAUAEAABAqAAAAQgUAABAqAAAAQgUAABAqAAAAQgUAABAqAAAAQgUAABAqAAAAQgUAAECoAAAAQgUAAECoAAAAQgUAAECoAAAAQgUAAECoAAAACBUAAECoAAAACBUAAECoAAAACBUAAECoAAAACBUAAECoAAAACBUAAAChAgAACBUAAAChAgAACBUAAAChAgAACBUAAAChAgAAIFQAAAChAgAAIFQAAAChAgAAIFQAAAChAgAAIFQAAAChAgAAIFQAAACECgAAIFQAAACECgAAIFQAAACECgAAIFQAAACECgAAgFABAACECgAAgFABAACECgAAgFABAACECgAAgFABAACECgAAgFABAAAQKgAAgFABAAAQKgAAgFABAAAQKgAAgFABAAAQKgAAAEIFAAAQKgAAAEIFAAAQKgAAAEIFAAAQKgAAAEIFAAAQKgAAAEIFAABAqAAAAEIFAABAqAAAAEIFAABAqAAAAEIFAABAqAAAAAgVAABAqAAAAAgVAABAqAAAAAgVAABAqAAAAAgVAABAqAAAAAgVAAAAoQIAAAgVAAAAoQIAAAgVAAAAoQIAAAgVAAAAoQIAACBUAAAAoQIAACBUAAAAoQIAACBUAAAAoQIAACBUAAAAoQIAACBUAAAAhAoAACBUAAAAhAoAACBUAAAAhAoAACBUAAAAhAoAAIBQAQAAhAoAAIBQAQAAhAoAAIBQAQAAhAoAAIBQAQAAhAoAAIBQAQAAECoAAIBQAQAAECoAAIBQAQAAECoAAIBQAQAAECoAAIBQMQEAACBUAAAAhAoAACBUAAAAhAoAACBUAAAAhAoAACBUAAAAhAoAAIBQAQAAhAoAAIBQAQAAhAoAAIBQAQAAhAoAAIBQAQAAhAoAAIBQAQAAECoAAIBQAQAAECoAAIBQAQAAECoAAIBQAQAAECoAAABCBQAAECoAAABCBQAAAAAA4EkHvXQNs748bRgAAAAASUVORK5CYII="/><div class="t m0 x1 h2 y1 ff1 fs0 fc0 sc0 ls0 ws0">N<span class="_ _0"></span><span class="fs1">I<span class="_ _0"></span>C<span class="_ _0"></span>H<span class="_ _0"></span>O<span class="_ _0"></span>L<span class="_ _0"></span>A<span class="_ _0"></span>S<span class="_ _1"> </span></span>A<span class="_ _0"></span><span class="fs1">D<span class="_ _2"></span>A<span class="_ _0"></span>M<span class="_ _0"></span>O<span class="_ _0"></span>U</span></div><div class="t m0 x2 h3 y2 ff2 fs2 fc0 sc0 ls0 ws0">+1 203-788-6903<span class="_ _3"> </span><span class="ff3">|<span class="_ _3"> </span></span>nicholasadamouemail@gmail.com</div><div class="t m0 x3 h4 y3 ff2 fs2 fc0 sc0 ls0 ws0">https://nicholasadamou.com</div><div class="t m0 x0 h5 y4 ff1 fs3 fc0 sc0 ls0 ws0">E<span class="_ _2"></span><span class="fs4">D<span class="_ _4"></span>U<span class="_ _2"></span>C<span class="_ _4"></span>A<span class="_ _5"></span>T<span class="_ _2"></span>I<span class="_ _4"></span>O<span class="_ _2"></span>N</span></div><div class="t m0 x4 h6 y5 ff1 fs5 fc0 sc0 ls0 ws0">Georgia<span class="_ _6"> </span>Institute<span class="_ _6"> </span>of<span class="_ _7"> </span>T<span class="_ _8"></span>echnology<span class="_ _9"> </span><span class="ff2">Atlanta, GA</span></div><div class="t m0 x4 h4 y6 ff4 fs2 fc0 sc0 ls0 ws0">Master of Science, Computer Science (Specialization:<span class="_ _7"> </span>Computing Systems)<span class="_ _a"> </span>December 2023 (Expected)</div><div class="t m0 x4 h6 y7 ff1 fs5 fc0 sc0 ls0 ws0">Cornell<span class="_ _6"> </span>Colleg<span class="_ _2"></span>e<span class="_ _b"> </span><span class="ff2">Mt.<span class="_ _c"> </span>V<span class="_ _8"></span>ernon, IA</span></div><div class="t m0 x4 h4 y8 ff4 fs2 fc0 sc0 ls0 ws0">Bachelor of Ar<span class="_ _2"></span>ts, Computer Science<span class="_ _d"> </span>Ma<span class="_ _5"></span>y 2020</div><div class="t m0 x0 h5 y9 ff1 fs3 fc0 sc0 ls0 ws0">E<span class="_ _2"></span><span class="fs4">X<span class="_ _4"></span>P<span class="_ _2"></span>E<span class="_ _4"></span>R<span class="_ _2"></span>I<span class="_ _4"></span>E<span class="_ _2"></span>N<span class="_ _4"></span>C<span class="_ _2"></span>E</span></div><div class="t m0 x4 h6 ya ff1 fs5 fc0 sc0 ls0 ws0">Staff<span class="_ _6"> </span>Software<span class="_ _7"> </span>Engineer<span class="_ _e"> </span><span class="ff2">Ma<span class="_ _5"></span>y 2021 – Present</span></div><div class="t m0 x4 h4 yb ff4 fs2 fc0 sc0 ls0 ws0">IBM<span class="_ _f"> </span>Southbury<span class="_ _8"></span>, CT</div><div class="t m0 x5 h6 yc ff2 fs5 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span><span class="fs2">Lifted and shifted IBM’<span class="_ _8"></span>s depar<span class="_ _2"></span>tmental application’<span class="_ _5"></span>s chatbot to the ledger application.</span></div><div class="t m0 x5 h4 yd ff2 fs2 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span>Utilized Bo<span class="_ _8"></span>x SDK and Jav<span class="_ _8"></span>a Spr<span class="_ _2"></span>ing Boot to send video embeds and images to the chatbot.</div><div class="t m0 x5 h4 ye ff2 fs2 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span>Incor<span class="_ _2"></span>porated JWT authentication f<span class="_ _8"></span>or meaningful user context within the chatbot.</div><div class="t m0 x5 h4 yf ff2 fs2 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span>Integrated Apache POI to construct a J<span class="_ _5"></span>av<span class="_ _8"></span>a Spr<span class="_ _2"></span>ing Boot micro-service to dynamically handle Excel document</div><div class="t m0 x6 h4 y10 ff2 fs2 fc0 sc0 ls0 ws0">generation and parsing f<span class="_ _5"></span>or the Direct File Impor<span class="_ _2"></span>t (DFI) f<span class="_ _8"></span>eature.</div><div class="t m0 x5 h4 y11 ff2 fs2 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span>Le<span class="_ _5"></span>v<span class="_ _5"></span>eraged GoLang and Gin to construct a micro-ser<span class="_ _2"></span>vice to handle transf<span class="_ _8"></span>err<span class="_ _2"></span>ing parsed Excel DFI ﬁles to the</div><div class="t m0 x6 h4 y12 ff2 fs2 fc0 sc0 ls0 ws0">downstream import job ser<span class="_ _2"></span>ver<span class="_ _8"></span>.</div><div class="t m0 x5 h4 y13 ff2 fs2 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span>During quar<span class="_ _2"></span>ter<span class="_ _2"></span>ly close periods the DFI f<span class="_ _5"></span>eature has suppor<span class="_ _2"></span>ted<span class="_ _10"> </span>150k ﬁles globally<span class="_ _11"></span>.</div><div class="t m0 x5 h4 y14 ff2 fs2 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span>Implemented E2E ﬁle upload f<span class="_ _5"></span>eature that suppor<span class="_ _2"></span>ts ﬁles up to a maximum siz<span class="_ _5"></span>e of 6MB by compressing and</div><div class="t m0 x6 h4 y15 ff2 fs2 fc0 sc0 ls0 ws0">chunking large ﬁles.<span class="_ _7"> </span>This process improv<span class="_ _8"></span>ed the ov<span class="_ _5"></span>erall upload perf<span class="_ _8"></span>or<span class="_ _2"></span>mance signiﬁcantly from<span class="_ _10"> </span>40 seconds to ¡ 5</div><div class="t m0 x6 h4 y16 ff2 fs2 fc0 sc0 ls0 ws0">seconds upload times with a ﬁle of 6 MB in size<span class="_ _5"></span>.</div><div class="t m0 x4 h6 y17 ff1 fs5 fc0 sc0 ls0 ws0">Associate<span class="_ _6"> </span>Software<span class="_ _7"> </span>Engineer<span class="_ _12"> </span><span class="ff2">June 2020 – Ma<span class="_ _8"></span>y 2021</span></div><div class="t m0 x4 h4 y18 ff4 fs2 fc0 sc0 ls0 ws0">IBM<span class="_ _f"> </span>Southbury<span class="_ _11"></span>, CT</div><div class="t m0 x5 h6 y19 ff2 fs5 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span><span class="fs2">Utilized Artifactory and T<span class="_ _11"></span>ravis CI to construct a De<span class="_ _5"></span>vOps CD pipeline to IBM Cloud k8s<span class="_ _5"></span>.</span></div><div class="t m0 x5 h4 y1a ff2 fs2 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span>Constructed an E2E micro-ser<span class="_ _2"></span>vice f<span class="_ _5"></span>or handling sending user emails based on user activity<span class="_ _11"></span>.</div><div class="t m0 x5 h4 y1b ff2 fs2 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span>Integrated Th<span class="_ _8"></span>ymeLeaf for handling the creation of the emails<span class="_ _5"></span>.</div><div class="t m0 x5 h4 y1c ff2 fs2 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span>Utilized J<span class="_ _5"></span>a<span class="_ _5"></span>va Spring Boot and JDBC to construct the RESTful APIs and DB queries related to user activity</div><div class="t m0 x6 h4 y1d ff2 fs2 fc0 sc0 ls0 ws0">emails.</div><div class="t m0 x5 h4 y1e ff2 fs2 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span>Implemented E2E user authentication system utilizing IBM SSO and JWT<span class="_ _11"></span>.</div><div class="t m0 x5 h4 y1f ff2 fs2 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span>Construct JWT authentication middleware into each of the J<span class="_ _5"></span>a<span class="_ _5"></span>v<span class="_ _5"></span>a Spring Boot and Go Gin micro-ser<span class="_ _2"></span>vices.</div><div class="t m0 x5 h4 y20 ff2 fs2 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span>Integrated dynamic session timeout handling f<span class="_ _8"></span>or user sessions based on JWT expiration.</div><div class="t m0 x5 h4 y21 ff2 fs2 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span>Implemented an E2E Data T<span class="_ _11"></span>ab<span class="_ _5"></span>le f<span class="_ _8"></span>eature for the Ledger Listing page.</div><div class="t m0 x5 h4 y22 ff2 fs2 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span>Constructed a Ja<span class="_ _5"></span>va Spring Boot and JDBC micro-service for handling RESTful APIs on the Ledger Listing</div><div class="t m0 x6 h4 y23 ff2 fs2 fc0 sc0 ls0 ws0">page.</div><div class="t m0 x5 h4 y24 ff2 fs2 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span>Utilized front-end-based pagination f<span class="_ _8"></span>or enhanced data table pagination perf<span class="_ _5"></span>ormance.</div><div class="t m0 x5 h4 y25 ff2 fs2 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span>Created an E2E system f<span class="_ _5"></span>or column ﬁltering that utilizes the browser’<span class="_ _8"></span>s local storage<span class="_ _5"></span>.</div><div class="t m0 x5 h4 y26 ff2 fs2 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span>Le<span class="_ _5"></span>v<span class="_ _5"></span>eraged Swagger in order to construct API documentation f<span class="_ _5"></span>or J<span class="_ _5"></span>av<span class="_ _8"></span>a, Go, and Node micro-services.</div><div class="t m0 x4 h6 y27 ff1 fs5 fc0 sc0 ls0 ws0">Software<span class="_ _6"> </span>Engineer<span class="_ _7"> </span>Intern<span class="_ _13"> </span><span class="ff2">Ma<span class="_ _5"></span>y 2019 – J<span class="_ _5"></span>une 2020</span></div><div class="t m0 x4 h4 y28 ff4 fs2 fc0 sc0 ls0 ws0">IBM<span class="_ _f"> </span>Southbury<span class="_ _11"></span>, CT</div><div class="t m0 x5 h6 y29 ff2 fs5 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span><span class="fs2">Constructed a modal state management system that lev<span class="_ _5"></span>erages Carbon w<span class="_ _5"></span>e Design System f<span class="_ _5"></span>or React.</span></div><div class="t m0 x5 h4 y2a ff2 fs2 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span>Le<span class="_ _5"></span>v<span class="_ _5"></span>eraged Swagger in order to construct API documentation f<span class="_ _5"></span>or e<span class="_ _5"></span>xisting micro-services.</div><div class="t m0 x5 h4 y2b ff2 fs2 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span>Implemented an E2E Data T<span class="_ _11"></span>ab<span class="_ _5"></span>le f<span class="_ _8"></span>eature that features:<span class="_ _7"> </span>front-end-based pagination, column sor<span class="_ _2"></span>ting, and</div><div class="t m0 x6 h4 y2c ff2 fs2 fc0 sc0 ls0 ws0">back-end-based column ﬁltering.</div><div class="t m0 x5 h4 y2d ff2 fs2 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span>P<span class="_ _5"></span>ar<span class="_ _2"></span>ticipated in IBM’<span class="_ _8"></span>s Hack CIO intern hackathon.<span class="_ _7"> </span>Led the dev<span class="_ _8"></span>elopment of a full stack web application designed</div><div class="t m0 x6 h4 y2e ff2 fs2 fc0 sc0 ls0 ws0">to encourage networking through matching.<span class="_ _7"> </span>Integrated with Google Firebase to handle user login, account</div><div class="t m0 x6 h4 y2f ff2 fs2 fc0 sc0 ls0 ws0">manipulation, and application data storage.<span class="_ _7"> </span>Created and led the presentation of the application to a group of</div><div class="t m0 x6 h4 y30 ff2 fs2 fc0 sc0 ls0 ws0">IBM e<span class="_ _5"></span>x<span class="_ _5"></span>ecutiv<span class="_ _5"></span>es and other hackathon participants.</div><div class="t m0 x4 h6 y31 ff1 fs5 fc0 sc0 ls0 ws0">Software<span class="_ _6"> </span>Engineer<span class="_ _7"> </span>Intern<span class="_ _14"> </span><span class="ff2">June 2018 – A<span class="_ _8"></span>ugust 2018</span></div><div class="t m0 x4 h4 y32 ff4 fs2 fc0 sc0 ls0 ws0">Blackbird<span class="_ _15"> </span>San F<span class="_ _8"></span>rancisco<span class="_ _5"></span>, CA</div><a class="l" href="mailto:nicholasadamouemail@gmail.com"><div class="d m1" style="border-style:none;position:absolute;left:538.931900px;bottom:964.020200px;width:153.832000px;height:11.955000px;background-color:rgba(255,255,255,0.000001);"></div></a><a class="l" href="https://nicholasadamou.com"><div class="d m1" style="border-style:none;position:absolute;left:492.820900px;bottom:941.245500px;width:126.026000px;height:13.405000px;background-color:rgba(255,255,255,0.000001);"></div></a></div><div class="pi" data-data='{"ctm":[1.300000,0.000000,0.000000,1.300000,0.000000,0.000000]}'></div></div>
+<div id="pf2" class="pf w0 h0" data-page-no="2"><div class="pc pc2 w0 h0"><img class="bi x0 y33 w1 h7" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABDgAAAHvCAIAAAA+cfjoAAAACXBIWXMAABYlAAAWJQFJUiTwAAAJRElEQVR42u3aQYpCMRBFUatJ7X/DgefAcUDk25R6zhLeIMmF3G4AAADDVBIrAAAAo/yZAAAAECoAAABCBQAAECoAAABCBQAAECoAAABCBQAAECoAAABCBQAAQKgAAABCBQAAQKgAAABCBQAAQKgAAABCBQAAQKgAAABCBQAAQKgAAAAIFQAAQKgAAAAIFQAAQKgAAAAIFQAAQKgAAAAIFQAAAKECAAAIFQAAAKECAAAIFQAAAKECAAAIFQAAAKECAAAIFQAAAKECAAAgVAAAAKECAAAgVAAAgG+yTDBKVRkB+CxJjADA9Q9jFwwAADCNr18AAIBQAQAAECoAAIBQAQAAECoAAIBQAQAAECoAAIBQAQAAECoAAABCBQAAECoAAABCBQAAECoAAABCBQAAECoAAABCBQAAECoAAABCBQAAQKgAAABCBQAAQKgAAABCBQAAQKgAAABCBQAAQKgAAAAIFQAAQKgAAAAIFQAAQKgAAAAIFQAAQKgAAAAIFQAAQKgAAAAIFQAAAKECAAAIFQAAAKECAAAIFQAAAKECAAAIFQAAAKECAAAgVAAAAKECAAAgVAAAAKECAAAgVAAAAKECAAAgVAAAAKECAAAgVAAAAIQKAAAgVAAAAIQKAAAgVAAAAIQKAAAgVAAAAIQKAACAUAEAAIQKAACAUAEAAIQKAACAUAEAAIQKAACAUAEAAIQKAACAUAEAADhZJmC4qjICwHxJjABc+Qh0rAAAANP4+gUAAAgVAAAAoQIAAAgVAAAAoQIAAAgVAAAAoQIAAAgVAAAAoQIAACBUAAAAoQIAACBUAAAAoQIAACBUAAAAoQIAACBUAAAAoQIAACBUAAAAhAoAACBUAAAAhAoAACBUAAAAhAoAACBUAAAAhAoAAIBQAQAAhAoAAIBQAQAAhAoAAIBQAQAAhAoAAIBQAQAAhAoAAIBQAQAAECoAAIBQAQAAECoAAIBQAQAAECoAAIBQAQAAECoAAABCBQAAECoAAABCBQAAECoAAABCBQAAECoAAABCBQAAECoAAABCBQAAQKgAAABCBQAAQKgAAABCBQAAQKgAAABCBQAAQKgAAAAIFQAAQKgAAAAIFQAAQKgAAAAIFQAAQKgAAAAIFQAAQKgAAACMsUzw/6rKCMAoSYwAwKw3s8sJAACYxtcvAABAqAAAAAgVAABAqAAAAAgVAABAqAAAAAgVAABAqAAAAAgVAAAAoQIAAAgVAAAAoQIAAAgVAAAAoQIAAAgVAAAAoQIAAAgVAAAAoQIAACBUAAAAoQIAACBUAAAAoQIAACBUAAAAoQIAACBUAAAAhAoAACBUAAAAhAoAACBUAAAAhAoAACBUAAAAhAoAACBUAAAAhAoAAIBQAQAAhAoAAIBQAQAAhAoAAIBQAQAAhAoAAIBQAQAAECoAAIBQAQAAECoAAIBQAQAAECoAAIBQAQAAECoAAIBQAQAAECoAAABCBQAAECoAAABCBQAAECoAAABCBQAAECoAAABCBQAAQKgAAABCBQAAQKgAAABCBQAAQKgAAABCBQAAQKgAAABCBQAAQKgAAACcLBP8pr13d9sB4CGJEQBGKUczAAAwja9fAACAUAEAABAqAACAUAEAABAqAACAUAEAABAqAACAUAEAABAqAAAAQgUAABAqAAAAQgUAABAqAAAAQgUAABAqAAAAQgUAABAqAAAAQgUAAECoAAAAQgUAAECoAAAAQgUAAECoAAAAQgUAAECoAAAACBUAAECoAAAACBUAAECoAAAACBUAAECoAAAACBUAAECoAAAACBUAAAChAgAACBUAAAChAgAACBUAAAChAgAACBUAAAChAgAAIFQAAAChAgAAIFQAAAChAgAAIFQAAAChAgAAIFQAAAChAgAAIFQAAACECgAAIFQAAACECgAAIFQAAACECgAAIFQAAACECgAAgFABAACECgAAgFABAACECgAAgFABAACECgAAgFABAACECgAAgFABAAA4WSbgWlVlBIA3SWIE4FdelY48AABgGl+/AAAAoQIAACBUAAAAoQIAACBUAAAAoQIAACBUAAAAoQIAACBUAAAAhAoAACBUAAAAhAoAACBUAAAAhAoAACBUAAAAhAoAACBUAAAAhAoAAIBQAQAAhAoAAIBQAQAAhAoAAIBQAQAAhAoAAIBQAQAAECoAAIBQAQAAECoAAIBQAQAAECoAAIBQAQAAECoAAIBQAQAAECoAAABCBQAAECoAAABCBQAAECoAAABCBQAAECoAAABCBQAAQKgAAABCBQAAQKgAAABCBQAAQKgAAABCBQAAQKgAAABCBQAAQKgAAAAIFQAAQKgAAAAIFQAAQKgAAAAIFQAAQKgAAAAIFQAAAKECAAAIFQAAAKECAAAIFQAAAKECAAAIFQAAAKECAAAIFQAAAKECAAAgVAAAAKECAAAgVAAAAKECAAAgVAAAAKECAAAgVAAAAIQKAAAgVAAAAIQKAAAgVAAAAIQKAAAgVAAAAIQKAAAgVAAAAIQKAACAUAEAAIQKAACAUAEAAIQKAACAUAEAAIQKAACAUAEAABAqAADATMsEnOy9u9sOAE9KYgSAq5RTFQAAmMbXLwAAQKgAAAAIFQAAQKgAAAAIFQAAQKgAAAAIFQAAQKgAAAAIFQAAAKECAAAIFQAAAKECAAAIFQAAAKECAAAIFQAAAKECAAAIFQAAAKECAAAgVAAAAKECAAAgVAAAAKECAAAgVAAAAKECAAAgVAAAAIQKAAAgVAAAAIQKAAAgVAAAAIQKAAAgVAAAAIQKAAAgVAAAAIQKAACAUAEAAIQKAACAUAEAAIQKAACAUAEAAIQKAACAUAEAABAqAACAUAEAABAqAACAUAEAABAqAACAUAEAABAqAACAUAEAABAqAAAAQgUAABAqAAAAQgUAABAqAAAAQgUAABAqAAAAQgUAAECoAAAAQgUAAECoAAAAQgUAAECoAAAAQgUAAECoAAAAQgUAAECoAAAACBUAAECoAAAACBUAAECoAAAACBUAAECoAAAACBUAAAChAgAACBUAAAChAgAACBUAAAChAgAACBUAAAChAgAACBUAAAChAgAAIFQAAAChAgAAIFQAAAChAgAAIFQAAAChAgAAIFQAAACECgAAMNMyAa/Ze3e3HQBelsQIACd3b7w2z2huD88AAAAASUVORK5CYII="/><div class="t m0 x5 h6 y2 ff2 fs5 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span><span class="fs2">W<span class="_ _5"></span>orked closely with the CT<span class="_ _8"></span>O and the engineer<span class="_ _2"></span>ing team to construct custom components for the Blac<span class="_ _8"></span>kbird web</span></div><div class="t m0 x6 h4 y34 ff2 fs2 fc0 sc0 ls0 ws0">and mobile apps le<span class="_ _5"></span>v<span class="_ _5"></span>eraging React, React Nativ<span class="_ _5"></span>e, React Nativ<span class="_ _8"></span>e Web<span class="_ _8"></span>, GraphQL, and Apollo<span class="_ _5"></span>.<span class="_ _7"> </span>Provided Quality</div><div class="t m0 x6 h4 y35 ff2 fs2 fc0 sc0 ls0 ws0">Assurance and unit testing on multiple b<span class="_ _5"></span>uilds of the Blac<span class="_ _5"></span>kbird web and mobile apps<span class="_ _5"></span>.</div><div class="t m0 x4 h6 y36 ff1 fs5 fc0 sc0 ls0 ws0">Software<span class="_ _6"> </span>Engineer<span class="_ _7"> </span>Intern<span class="_ _16"> </span><span class="ff2">December 2016 – December 2016</span></div><div class="t m0 x4 h4 y37 ff4 fs2 fc0 sc0 ls0 ws0">Mack Media Group<span class="_ _17"> </span>Brookﬁeld, CT</div><div class="t m0 x5 h6 y38 ff2 fs5 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span><span class="fs2">Le<span class="_ _5"></span>v<span class="_ _5"></span>eraged Google AMP pages to de<span class="_ _5"></span>v<span class="_ _5"></span>elop a mobile-ﬁrst, user-friendly<span class="_ _11"></span>, and responsive home page f<span class="_ _8"></span>or the</span></div><div class="t m0 x6 h4 y39 ff2 fs2 fc0 sc0 ls0 ws0">agency<span class="_ _11"></span>.<span class="_ _7"> </span>Worked with k<span class="_ _5"></span>ey stak<span class="_ _8"></span>eholders such as UI/UX designers, and the dev<span class="_ _8"></span>elopment team lead to constr<span class="_ _2"></span>uct</div><div class="t m0 x6 h4 y3a ff2 fs2 fc0 sc0 ls0 ws0">the web page.<span class="_ _7"> </span>This f<span class="_ _5"></span>eature led to a decreased page bounce rate on mobile de<span class="_ _8"></span>vices by users due to the</div><div class="t m0 x6 h4 y3b ff2 fs2 fc0 sc0 ls0 ws0">decreased page load time that AMP boasts.</div><div class="t m0 x4 h6 y3c ff1 fs5 fc0 sc0 ls0 ws0">Freelance<span class="_ _6"> </span>Web<span class="_ _6"> </span>Designer<span class="_ _18"> </span><span class="ff2">July 2016 – J<span class="_ _8"></span>uly 2016</span></div><div class="t m0 x4 h4 y3d ff4 fs2 fc0 sc0 ls0 ws0">Advanced Electrical Services Inc<span class="_ _19"> </span>New Milf<span class="_ _8"></span>ord, CT</div><div class="t m0 x5 h6 y3e ff2 fs5 fc0 sc0 ls0 ws0">-<span class="_ _10"> </span><span class="fs2">W<span class="_ _5"></span>orked closely with the client to both design and implement a re<span class="_ _5"></span>v<span class="_ _5"></span>amped v<span class="_ _5"></span>ersion of Adv<span class="_ _5"></span>anced Electrical</span></div><div class="t m0 x6 h4 y3f ff2 fs2 fc0 sc0 ls0 ws0">Ser<span class="_ _2"></span>vices’ website using SASS<span class="_ _8"></span>, Pug, and Jav<span class="_ _8"></span>aScr<span class="_ _2"></span>ipt.</div><div class="t m0 x0 h5 y40 ff1 fs3 fc0 sc0 ls0 ws0">P<span class="_ _2"></span><span class="fs4">R<span class="_ _2"></span>O<span class="_ _4"></span>J<span class="_ _2"></span>E<span class="_ _4"></span>C<span class="_ _2"></span>T<span class="_ _4"></span>S</span></div><div class="t m0 x4 h6 y41 ff1 fs2 fc0 sc0 ls0 ws0">set-me-up<span class="_ _6"> </span><span class="ff3">|<span class="_ _6"> </span><span class="ff2">https://github<span class="_ _8"></span>.com/nicholasadamou/set-me-up <span class="ff3">|<span class="_ _6"> </span><span class="ff4">Shell, Python, PHP<span class="_ _1a"></span>, AppleScript<span class="_ _1b"> </span><span class="ff2 fs5">October 2022</span></span></span></span></span></div><div class="t m0 x6 h4 y42 ff2 fs2 fc0 sc0 ls0 ws0">set-me-up aims to simplify the dull setup and maintenance of Mac OS de<span class="_ _5"></span>v<span class="_ _5"></span>elopment environments<span class="_ _5"></span>.</div><div class="t m0 x4 h6 y43 ff1 fs2 fc0 sc0 ls0 ws0">set-me-up-blueprint<span class="_ _6"> </span><span class="ff3">|<span class="_ _1c"> </span><span class="ff2">https://github<span class="_ _5"></span>.com/nicholasadamou/set-me-up-b<span class="_ _5"></span>lueprint <span class="ff3">|<span class="_ _6"> </span><span class="ff4">Shell<span class="_ _1d"> </span></span></span><span class="fs5">Nov<span class="_ _8"></span>ember 2020</span></span></span></div><div class="t m0 x6 h4 y44 ff2 fs2 fc0 sc0 ls0 ws0">A template to manage set-me-up setups.</div><div class="t m0 x4 h6 y45 ff1 fs2 fc0 sc0 ls0 ws0">plex-s3fs<span class="_ _1c"> </span><span class="ff3">|<span class="_ _1c"> </span><span class="ff2">https://github.com/nicholasadamou/ple<span class="_ _8"></span>x-s3fs <span class="ff3">|<span class="_ _6"> </span><span class="ff4">Shell<span class="_ _1e"> </span></span></span><span class="fs5">October 2019</span></span></span></div><div class="t m0 x6 h4 y46 ff2 fs2 fc0 sc0 ls0 ws0">A Ple<span class="_ _5"></span>x Media Ser<span class="_ _2"></span>v<span class="_ _5"></span>er that is bac<span class="_ _5"></span>ked b<span class="_ _8"></span>y an Amazon S3 Buck<span class="_ _5"></span>et.</div><div class="t m0 x4 h6 y47 ff1 fs2 fc0 sc0 ls0 ws0">clion-gate<span class="_ _5"></span>wa<span class="_ _5"></span>y<span class="_ _1c"> </span><span class="ff3">|<span class="_ _6"> </span><span class="ff2">https://github<span class="_ _5"></span>.com/nicholasadamou/clion-gatew<span class="_ _5"></span>a<span class="_ _5"></span>y <span class="ff3">|<span class="_ _1c"> </span><span class="ff4">Shell, Dock<span class="_ _5"></span>erﬁle, CMak<span class="_ _5"></span>e, C++<span class="_ _1f"> </span><span class="ff2 fs5">December 2023</span></span></span></span></span></div><div class="t m0 x6 h4 y48 ff2 fs2 fc0 sc0 ls0 ws0">A por<span class="_ _2"></span>tal to CLion using JetBrains Gate<span class="_ _5"></span>wa<span class="_ _8"></span>y and Docker<span class="_ _8"></span>.</div><div class="t m0 x4 h6 y49 ff1 fs2 fc0 sc0 ls0 ws0">down-to-netw<span class="_ _5"></span>ork<span class="_ _1c"> </span><span class="ff3">|<span class="_ _6"> </span><span class="ff2">https://github<span class="_ _5"></span>.com/nicholasadamou/down-to-netw<span class="_ _5"></span>ork <span class="ff3">|<span class="_ _6"> </span><span class="ff4">Ja<span class="_ _5"></span>v<span class="_ _5"></span>aScript<span class="_ _20"> </span><span class="ff2 fs5">December 2021</span></span></span></span></span></div><div class="t m0 x6 h4 y4a ff2 fs2 fc0 sc0 ls0 ws0">Down to Network is a dynamic web / mobile app optimiz<span class="_ _5"></span>ed to connect ne<span class="_ _5"></span>w f<span class="_ _5"></span>ellow IBMers to e<span class="_ _8"></span>xper<span class="_ _2"></span>ienced</div><div class="t m0 x6 h4 y4b ff2 fs2 fc0 sc0 ls0 ws0">IBMers through the power of matching.</div><div class="t m0 x4 h6 y4c ff1 fs2 fc0 sc0 ls0 ws0">humblescraper<span class="_ _1c"> </span><span class="ff3">|<span class="_ _6"> </span><span class="ff2">https://github<span class="_ _5"></span>.com/nicholasadamou/humb<span class="_ _5"></span>lescraper <span class="ff3">|<span class="_ _1c"> </span><span class="ff4">Python<span class="_ _21"> </span></span></span><span class="fs5">December 2023</span></span></span></div><div class="t m0 x6 h4 y4d ff2 fs2 fc0 sc0 ls0 ws0">A small script to retr<span class="_ _2"></span>ie<span class="_ _8"></span>ve Name, Price/Sale, and Time inf<span class="_ _8"></span>or<span class="_ _2"></span>mation from Humble Bundle store links f<span class="_ _8"></span>or use in</div><div class="t m0 x6 h4 y4e ff2 fs2 fc0 sc0 ls0 ws0">robots or web-hooks.<span class="_ _7"> </span>Uses selenium.</div><div class="t m0 x4 h6 y4f ff1 fs2 fc0 sc0 ls0 ws0">krios-github-bot<span class="_ _1c"> </span><span class="ff3">|<span class="_ _6"> </span><span class="ff2">https://github<span class="_ _5"></span>.com/nicholasadamou/krios-github-bot <span class="ff3">|<span class="_ _6"> </span><span class="ff4">Python<span class="_ _22"> </span></span></span><span class="fs5">Nov<span class="_ _8"></span>ember 2022</span></span></span></div><div class="t m0 x6 h4 y50 ff2 fs2 fc0 sc0 ls0 ws0">A pal that keeps y<span class="_ _5"></span>our dependencies up-to-date<span class="_ _5"></span>.</div><a class="l" href="https://github.com/nicholasadamou/set-me-up"><div class="d m1" style="border-style:none;position:absolute;left:132.224300px;bottom:692.138200px;width:203.145000px;height:15.686000px;background-color:rgba(255,255,255,0.000001);"></div></a><a class="l" href="https://github.com/nicholasadamou/set-me-up-blueprint"><div class="d m1" style="border-style:none;position:absolute;left:191.812400px;bottom:647.973300px;width:244.620000px;height:15.686000px;background-color:rgba(255,255,255,0.000001);"></div></a><a class="l" href="https://github.com/nicholasadamou/plex-s3fs"><div class="d m1" style="border-style:none;position:absolute;left:126.292400px;bottom:603.809700px;width:197.866000px;height:15.686000px;background-color:rgba(255,255,255,0.000001);"></div></a><a class="l" href="https://github.com/nicholasadamou/clion-gateway"><div class="d m1" style="border-style:none;position:absolute;left:155.277200px;bottom:559.644800px;width:218.558000px;height:15.686000px;background-color:rgba(255,255,255,0.000001);"></div></a><a class="l" href="https://github.com/nicholasadamou/down-to-network"><div class="d m1" style="border-style:none;position:absolute;left:174.213000px;bottom:515.481200px;width:231.837000px;height:15.686000px;background-color:rgba(255,255,255,0.000001);"></div></a><a class="l" href="https://github.com/nicholasadamou/humblescraper"><div class="d m1" style="border-style:none;position:absolute;left:163.060300px;bottom:455.774800px;width:223.888000px;height:15.686000px;background-color:rgba(255,255,255,0.000001);"></div></a><a class="l" href="https://github.com/nicholasadamou/krios-github-bot"><div class="d m1" style="border-style:none;position:absolute;left:169.627900px;bottom:396.068400px;width:227.105000px;height:15.686000px;background-color:rgba(255,255,255,0.000001);"></div></a></div><div class="pi" data-data='{"ctm":[1.300000,0.000000,0.000000,1.300000,0.000000,0.000000]}'></div></div>
+</div>
+<div class="loading-indicator">
+<img alt="" src="data:image/png;base64,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"/>
+</div>
+</body>
+</html>

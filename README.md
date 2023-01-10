@@ -22,10 +22,10 @@ This will build the CV using the `Dockerfile` in the root of the repository. The
 You can preview the CV by running the following command:
 
 ```bash
-cd docs && python -m SimpleHTTPServer 8000
+python3 -m http.server
 ```
 
-Then, navigate to [http://localhost:8000](http://localhost:8000) to view the CV.
+Then, navigate to [http://localhost:8000/docs](http://localhost:8000/docs) to view the CV.
 
 ## License
 
