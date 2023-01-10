@@ -15,7 +15,7 @@ To build the CV, run the following command:
 ```bash
 ./build-cv.sh
 ```
-This will build the CV using the `Dockerfile` in the root of the repository. The output will be a PDF file named [`cv.pdf`](docs/cv.pdf) in the [`docs`](docs) directory.
+This will build the CV using the `Dockerfile` in the root of the repository. The output will be a PDF file named `cv.pdf` and a webpage named `index.html` in the [`docs`](docs) directory.
 
 ## Preview
 
