@@ -2,7 +2,7 @@ FROM ubuntu:jammy@sha256:34fea4f31bf187bc915536831fd0afc9d214755bf700b5cdb1336c8
 ENV DEBIAN_FRONTEND noninteractive
 
 # Install LaTeX and dependencies
-RUN apt-get update --quiet && apt-get install --quiet --yes \
+RUN apt update --quiet && apt install --quiet --yes \
     texlive-full \
     curl
 
