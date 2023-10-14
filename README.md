@@ -21,7 +21,7 @@ This will build the CV using the `Dockerfile` in the root of the repository. The
 
 ### Preview
 
-Next, you can preview the CV by navigating to [http://localhost:8000](http://localhost:8000) to view the CV.
+Next, you can preview the CV by navigating to [http://localhost:8080](http://localhost:8080) to view the CV.
 
 By utilizing the *fswatch* command, the CV will be rebuilt and the preview will be refreshed *automagically* 🪄 whenever a change is made to the CV.
 
