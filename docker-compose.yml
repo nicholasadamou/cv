@@ -12,7 +12,6 @@ services:
     image: cv # Set image name for future reference
     ports:
       - "3000:3000" # Map the Browser-sync live reload server port
-      - "8080:8080" # Map the HTTP server port
     volumes:
       - "./:/data" # Map the current directory to /data inside the container
     environment:

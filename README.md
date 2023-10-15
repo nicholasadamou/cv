@@ -24,7 +24,7 @@ docker compose up
 
 You can preview the CV by navigating to [http://localhost:3000](http://localhost:3000) to view the CV.
 
-By utilizing the `inotifywait` and `browser-sync` commands, the CV will be rebuilt and the preview will be refreshed *automagically* 🪄 whenever a change is made to the CV.
+By utilizing `polling` and the `browser-sync` command, the CV will be rebuilt and the preview will be refreshed *automagically* 🪄 whenever a change is made to the CV.
 
 ## License
 

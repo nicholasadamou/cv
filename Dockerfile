@@ -1,3 +1,4 @@
+# Using Ubuntu 20.04 as the base image because pdf2htmlEX is not supported in later versions of Ubuntu
 FROM ubuntu:20.04
 
 # Set environment variables to non-interactive (this reduces output and potential errors during build)
@@ -11,16 +12,14 @@ RUN apt-get update && \
         ca-certificates \
         gnupg \
 		lsb-release \
-		wget \
-		inotify-tools && \
+		perl \
+		wget && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Create the keyrings directory
-RUN mkdir -p /etc/apt/keyrings/
-
-# Install Node.js 20.x
+# Install Node.js 20.x using nodesource
 RUN export NODE_MAJOR_VERSION=20 && \
+	mkdir -p /etc/apt/keyrings/ && \
     curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg && \
     echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR_VERSION.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list && \
     apt-get update && \
@@ -29,18 +28,15 @@ RUN export NODE_MAJOR_VERSION=20 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install browser-sync globally
+# Install browser-sync
 RUN npm install -g browser-sync
 
-# Install TeX Live dependencies
+# Install texlive
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        texlive-latex-base \
-        texlive-latex-extra \
-        texlive-fonts-recommended \
-        texlive-fonts-extra \
-        texlive-lang-english \
-        texlive-xetex && \
+        texlive \
+		texlive-latex-recommended \
+		texlive-extra-utils && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -59,6 +55,11 @@ RUN wget -O pdf2htmlEX.deb https://github.com/pdf2htmlEX/pdf2htmlEX/releases/dow
     rm -rf /var/lib/apt/lists/* && \
 	rm pdf2htmlEX.deb
 
+# Install getnonfreefonts and nonfreefonts
+RUN curl --remote-name https://www.tug.org/fonts/getnonfreefonts/install-getnonfreefonts && \
+    texlua install-getnonfreefonts && \
+    getnonfreefonts --sys --all
+
 # Copy the cv.tex file and other required files to the container
 # Set permissions and ownership in the same layer to avoid duplicating the file in another layer
 COPY cv.tex script.sh /data/
@@ -71,8 +72,11 @@ USER nobody
 # Set the working directory
 WORKDIR /data
 
-# Expose the ports for the live reload server and HTTP server
-EXPOSE 3000 8080
+# Expose the port for the browser-sync server
+EXPOSE 3000
 
-# Run the script to watch for changes and start the live reload server
+# Run the script to watch for changes and start the browser-sync server
 CMD ["/data/script.sh"]
+
+# Set the default volume
+VOLUME [ "/data" ]
