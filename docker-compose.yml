@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  cv:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    user: root # Force root privileges for the container so that docker.sock can be used
+    platform: linux/amd64 # Force rossetta2 emulation on Apple Silicon
+    hostname: cv # Set hostname for the container
+    container_name: cv # Set container name for easier identification
+    image: cv # Set image name for future reference
+    ports:
+      - "3000:3000" # Map the Browser-sync live reload server port
+      - "8080:8080" # Map the HTTP server port
+    volumes:
+      - "./:/data" # Map the current directory to /data inside the container
+    environment:
+      - DEBIAN_FRONTEND=noninteractive # Set environment variable to non-interactive mode for apt-get installations
+    stdin_open: true # Keep the container running
+    tty: true # Allocate a pseudo-TTY, making it possible to attach to the container

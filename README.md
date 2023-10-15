@@ -7,33 +7,24 @@ This repository is used to host, build, and deploy my curriculum vitae (CV).
 To build the CV, you will need the following:
 
 * [Docker](https://www.docker.com/)
-* [fswatch](https://github.com/emcrisostomo/fswatch)
 
-## Build
+## Docker
 
 To build the CV, run the following command:
 
 ```bash
-./build-cv.sh
+docker compose build
 ```
 
-This will build the CV using the `Dockerfile` in the root of the repository. The output will be a PDF file named `cv.pdf` and a webpage named `index.html` in the [`docs`](docs) directory.
-
-### Preview
-
-Next, you can preview the CV by navigating to [http://localhost:8080](http://localhost:8080) to view the CV.
-
-By utilizing the *fswatch* command, the CV will be rebuilt and the preview will be refreshed *automagically* 🪄 whenever a change is made to the CV.
-
-If you want to manually start the preview server, run the following command:
+To view the CV, run the following command:
 
 ```bash
-python3 -m http.server 8080 --directory docs
+docker compose up
 ```
 
-### To Stop the Preview
+You can preview the CV by navigating to [http://localhost:3000](http://localhost:3000) to view the CV.
 
-To stop the preview, you can terminate the process by pressing `CTRL + C`.
+By utilizing the `inotifywait` and `browser-sync` commands, the CV will be rebuilt and the preview will be refreshed *automagically* 🪄 whenever a change is made to the CV.
 
 ## License
 
