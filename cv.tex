@@ -42,9 +42,6 @@
   \vspace{-4pt}\scshape\raggedright\large
 }{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
 
-% Ensure that generate pdf is machine readable/ATS parsable
-\pdfgentounicode=1
-
 %-------------------------
 % Custom commands
 \newcommand{\resumeItem}[1]{
@@ -97,17 +94,14 @@
 \begin{document}
 
 %----------HEADING----------
-\begin{center}
-	\begin{tabular}{c}
-		\textbf{\Huge \scshape Nicholas Adamou}                                   \\[8pt]
-		\href{mailto:nicholas.adamou@ibm.com}{nicholas.adamou@ibm.com}            \\[4pt]
-		\href{https://nicholasadamou.com}{\underline{\smash{nicholasadamou.com}}} \\[8pt]
-	\end{tabular}
-\end{center}
-
-%-----------PROFILE-----------
-\section{\textbf{Profile}}
-Award-winning, performance-driven full-stack software engineer with a demonstrated history of working on the front-end and back-end of cloud-native applications Experienced in a wide range of web-based technologies. Highly skilled in software design, system architecture, software development, requirements analysis, and problem-solving. Graduated \textit{Summa Cum Laude} in Computer Science at \textit{Cornell College}. Currently pursuing a Master of Science in Computer Science at \textit{Georgia Institute of Technology}.
+\noindent
+\begin{tabularx}{\textwidth} { 
+    >{\raggedright\arraybackslash}X 
+    >{\raggedleft\arraybackslash}X}
+\href{https://www.linkedin.com/in/nicholas-adamou/}{\textbf{\huge \scshape Nicholas Adamou}} 
+& \href{https://github.com/nicholasadamou}{https://github.com/nicholasadamou}\\ [5pt]
+& \href{mailto:nicholas.adamou@outlook.com}{nicholas.adamou@outlook.com}
+\end{tabularx}
 
 %-----------EXPERIENCE-----------
 \section{\textbf{Experience}}
@@ -115,60 +109,35 @@ Award-winning, performance-driven full-stack software engineer with a demonstrat
 \resumeSubHeadingListStart
 
 \resumeSubheading
-{Software Engineer III, Consolidation NG Squad}{October 2023 - Present}
-{IBM}{(Hybrid) Southbury, CT}
+{Senior Software Engineer}{October 2023 - Present}
+{IBM}{Armonk, NY}
 \resumeItemListStart
-\resumeItem{Lead developer for the Consolidation NG Squad, responsible for developing and maintaining IBM's next-generation financial consolidation application.}
-\resumeItem{Inner-source contributor and IBM's CIO CI/CD Java and Maven-based pipeline maintainer used by hundreds of teams.}
+\resumeItem{Led the development of several critical microservices utilizing Java Spring Boot. This includes the mail service for email notifications crafted with Thymeleaf, a batch service that handles 10+ critical cron jobs using Spring Boot's scheduling interface, and interoperates with IBM MQ queues through the use of JMS MQ and Cloudant.}
+\resumeItem{Built a multi-threaded Exporter Service for data management between IBM Cloudant, DB2 databases and generating Intercompany Agreements (ICA) legal documents, using Java Spring Boot, Apache POI, LibreOffice's LibrePDF.}
+\resumeItem{Code owner of IBM's CI/CD Maven and Node.js pipelines, improving software delivery and efficiency for hundreds of teams.}
+\resumeItem{Integrated End-to-End (E2E) User Interface testing into IBM's CI/CD pipeline, enhancing software testablity.}
+\resumeItem{Developed system for Time-Based One-Time Passwords (TOTPs) to streamline automated E2E testing.}
+\resumeItem{Built an automated Python script, GitHub SSH Key Manager, which streamlines the process of generating and uploading SSH keys to GitHub or GitHub Enterprise accounts.}
 \resumeItemListEnd
 
 \resumeSubheading
-{Software Engineer II, Consolidation NG Squad}{June 2023 - October 2023}
-{IBM}{(Hybrid) Southbury, CT}
+{Software Engineer II}{May 2021 - October 2023}
+{IBM}{Southbury, CT}
 \resumeItemListStart
-\resumeItem{Led strategic planning, architectural design, and full-stack software development.}
-\resumeItem{Directed the technology stack selection, prioritizing user experience and system performance.}
-\resumeItem{Created a comprehensive system context diagram, identified use cases, and defined functional and non-functional requirements.}
-\resumeItem{Launched the boilerplate for Next.js front-end and Java Spring Boot back-end services.}
-\resumeItem{Developed a Spring Federated Auth Server that interoperates with IBM w3id SSO Open ID Connect 1.0 and our IBM db2 database.}
-\resumeItem{Integrated Next-Auth into the Next.js application to mediate between the Federated Auth Server, w3id, and IBM db2, improving our system's authentication and security.}
-\resumeItem{As an Inner-Source Contributor for IBM's CIO CI/CD, constructed and managed custom CI/CD pipelines. I Introduced enhanced support for strategic technologies such as Java v17 with Maven and Spring Boot and layer tools with Node.js v18 LTS.}
-\resumeItem{Successfully integrated CIO CI/CD into the project, ensuring seamless, automated software delivery.}
-\resumeItem{Implemented automated testing with Java-based Selenium, which led to a 30\% reduction in software defects and improved system reliability.}
-\resumeItem{Oversaw the integration of IBM Cloud Secrets Manager into the back-end system, enhancing security.}
-\resumeItem{Reduced time spent updating secrets in IBM's CI/CD pipeline system by 99.99\% by creating an internal secrets updater used by hundreds of teams.}
-\resumeItemListEnd
-
-\resumeSubheading
-{Software Engineer II, Global Ledger NG Squad}{May 2021 - June 2023}
-{IBM}{(Hybrid) Southbury, CT}
-\resumeItemListStart
-\resumeItem{Implemented an IBM ITSS-compliant DevOps strategy utilizing IBM's Hybrid Cloud Cirrus, Quay Repository with Artifactory, Travis CI with multi-stage builds, custom Docker image solutions, static and dynamic code analysis, and open-source vulnerability scanning to improve maintainability and security. The strategy also included using Gitflow as the team's GitOps workflow, providing a robust and streamlined development process while ensuring compliance with industry standards and IBM-specific requirements.}
-\resumeItem{Successfully inner-sourced the IBM ITSS-compliant DevOps strategy to the broader organization. Constructed comprehensive documentation outlining the strategy and its implementation, which served as a valuable resource for teams during adoption and maintenance.}
-\resumeItem{Constructed an E2E micro-service for handling sending user emails based on user activity. Integrated ThymeLeaf for handling the creation of emails within a Java Spring Boot micro-service. Constructed the RESTful APIs and DB queries related to user activity emails.}
+\resumeItem{Developed a Spring Federated Auth Server integrated with IBM w3id SSO Open ID Connect 1.0 and IBM db2 database, enhancing authentication.}
+\resumeItem{Implemented a Search UI with multi-faceted filters and pagination using Next.js, Carbon Design System for React and Java Spring Boot.}
+\resumeItem{Developed a full-stack, editable data-table component using Carbon Design System and React Hook Forms.}
+\resumeItem{Designed a custom Sidebar Tabs component using Carbon Design System for React, enhancing application navigation.}
+\resumeItem{Contributed to IBM's CIO CI/CD, creating custom CI/CD pipelines with enhanced support for Java v17, Maven, Spring Boot, and Node.js v18 LTS.}
+\resumeItem{Created an internal secrets updater reducing time spent updating secrets in IBM's CI/CD pipeline by 99.99\%.}
+\resumeItem{Developed and inner-sourced the Spring Secrets Manager using Spring Boot v3 framework and IBM Cloud Secrets Manager for secure keystore retrieval.}
+\resumeItem{Developed and implemented a Multipart File Uploader project to expedite the process of integrating multipart file upload functionality using Spring Boot and React.}
+\resumeItem{Implemented an application security focused shift-left DevOps strategy focusing on industry standard best practices.}
+\resumeItem{Enabled handling of approx. 150k files during quarterly close periods via Direct File Import (DFI) feature.}
+\resumeItem{Integrated Apache POI to create a Java Spring Boot micro-service for dynamic Excel document generation and parsing.}
 \resumeItem{Improved user authentication and security by implementing secure cookie management by setting the 'HTTPOnly' and 'Secure' flags on JWT and refresh token cookies to prevent cross-site scripting (XSS) attacks.}
-\resumeItem{Integrated Apache POI to construct a Java Spring Boot micro-service to dynamically handle Excel document generation and parsing for the Direct File Import (DFI) feature.}
-\resumeItem{During quarterly close periods, the DFI feature has supported approx. 150k files globally.}
-\resumeItem{Implemented E2E file upload feature that supports files up to a maximum size of 6 MB by compressing and chunking large files. This process improved the overall upload performance significantly from approx. 40 seconds to less than 5 seconds upload times with a file of 6 MB in size.}
-\resumeItem{Collaborated with the CIO CI/CD team to successfully integrate and develop PNPM and Maven support for the CI/CD pipeline, utilizing cutting-edge tools such as Tekton, Docker, and Buildah to optimize cross-functional workflows and expedite compliant software delivery for hundreds of teams at IBM.}
 \resumeItemListEnd
 
-
-\resumeSubheading
-{Software Engineer, Global Ledger NG Squad}{June 2020 - May 2021}
-{IBM}{(Remote) Southbury, CT}
-\resumeItemListStart
-\resumeItem{Developed a chatbot application that incorporated user authentication by obtaining JWT from domain cookies because the chatbot was designed as an iframe embed, enabling it to be aware of the user's identity and provide a personalized experience. Additionally, the chatbot was equipped with special features such as embedding videos and images via box and support for application-specific commands. I demonstrated this technology to cross-functional teams and guided implementation, successfully deploying similar chatbot solutions throughout the organization.}
-\resumeItem{Utilized Artifactory and Travis CI to construct a DevOps CD pipeline to IBM Cloud k8s.}
-\resumeItem{Implemented E2E user authentication system utilizing IBM SSO and JWT.}
-\resumeItem{Construct JWT authentication middleware into each Java Spring Boot micro-services.}
-\resumeItem{Integrated dynamic session timeout handling for user sessions based on JWT expiration.}
-\resumeItem{Implemented an E2E Data Table feature for the Ledger Listing page.}
-\resumeItem{Constructed a Java Spring Boot and JDBC micro-service for handling RESTful APIs on the Ledger Listing page.}
-\resumeItem{Utilized front-end-based pagination for enhanced data table pagination performance.}
-\resumeItem{Leveraged Swagger to construct API documentation for Java and Node micro-services.}
-\resumeItem{Participated in the IBM Developer JumpStart 2020 Slam event, where IBM software engineers in groups of 4 - 5 are matched with a senior-level engineer working on a real problem for their respective department and a design coach. Developed Krios - a GitHub bot designed to keep dependencies up-to-date as part of the IBM Research DevSecOps team. Winner of the IBM Developer JumpStart Slam 2021 People's Choice Award for overall best Proof of Concept and Presentation.}
-\resumeItemListEnd
 
 \resumeSubHeadingListEnd
 
@@ -179,147 +148,14 @@ Award-winning, performance-driven full-stack software engineer with a demonstrat
 
 \resumeSubheading
 {Georgia Institute of Technology}{Atlanta, GA}
-{Master of Science, Computer Science (Specialization: Computing Systems \& Security)}{December 2023 (Expected)}
+{Master of Science, Computer Science (Specialization: Computing Systems \& Security)}{May 2024 (Expected)}
 \resumeSubheading
 {Cornell College}{Mt. Vernon, IA}
 {Bachelor of Arts, Computer Science}{May 2020}
 
 \resumeSubHeadingListEnd
 
-%-----------HACKATHONS & TECHNICAL PRESENTATIONS-----------
-\section{\textbf{Hackathons \& Technical Presentations}}
-
-\resumeSubHeadingListStart
-
-\resumeSubheading
-{F\&SC Hackathon}{September 2021}
-{IBM}{Southbury, CT}
-\resumeItemListStart
-\resumeItem{Developed a full stack digital assistant web application that leverages IBM Watson.}
-\resumeItem{Managed a group of four software engineers over the course of three days to develop our POC.}
-\resumeItem{Created and led presentation of the digital assistant application to a panel of IBM executives.}
-\resumeItemListEnd
-
-\resumeSubheading
-{HackUIowa Hackathon}{January 2020}
-{University of Iowa}{Iowa City, IA}
-\resumeItemListStart
-\resumeItem{Developed a crowd-sourced stock analyzer and predictor; How much do emotions affect a stock price?}
-\resumeItem{Leveraged Python, Google Natural Language API, Twitter, and Wikidata query service.}
-\resumeItem{Managed a group of 3 software engineers over two-day period to develop a POC.}
-\resumeItem{Created and led presentation of the application to a panel of HackUIowa judges.}
-\resumeItemListEnd
-
-\resumeSubheading
-{HackCIO Hackathon}{July 2019}
-{IBM}{Armonk, NY}
-\resumeItemListStart
-\resumeItem{Led the development of a full stack web application designed to encourage networking through matching.}
-\resumeItem{Integrated with Google Firebase to handle user login, account manipulation, and application data storage.}
-\resumeItem{Created and led presentation of application to a group of IBM executives and other hackathon participants.}
-\resumeItemListEnd
-
-\resumeSubHeadingListEnd
-
-%-----------VOLUNTEERING-----------
-\section{\textbf{Volunteering}}
-
-\resumeSubHeadingListStart
-
-\resumeSubheading
-{Software Engineering Mentor}{January 2021 - Present}
-{IBM}{Southbury, CT}
-\resumeItemListStart
-\resumeItem{Served as a software engineering mentor for interns, providing guidance, coaching, and hands-on training throughout the internship program.}
-\resumeItem{Designed and led projects for interns to work on and provided ongoing mentorship and support before, during, and after their internship.}
-\resumeItem{Coached interns on software development best practices, technical skills, and professional development.}
-\resumeItem{Successfully prepared interns for full-time positions and assisted with the onboarding process.}
-\resumeItemListEnd
-
-\resumeSubheading
-{Inner-Source Contributor}{June 2020 - Present}
-{IBM}{Southbury, CT}
-\resumeItemListStart
-\resumeItem{Contributed to IBM's inner-source initiatives by constructing reusable assets and collaborating with cross-function teams.}
-\resumeItem{Demonstrated expertise in writing clean, well-documented, and maintainable code.}
-\resumeItem{Collaborated with team members to review pull requests, provide feedback and suggestions, and ensure code met the project's standards.}
-\resumeItem{Proactively identified and resolved bugs and issues and Contributed to the documentation and testing of the projects.}
-\resumeItem{Demonstrated ability to work in a collaborative and inner-source environment and a commitment to the principles of inner-source development.}
-\resumeItemListEnd
-
-\resumeSubheading
-{Community Member}{September 2016 - Present}
-{Stack Exchange}{Remote}
-\resumeItemListStart
-\resumeItem{Contributed to \emph{Stack Overflow}, \emph{Unix \& Linux}, \emph{Raspberry Pi}, \emph{Ask Ubuntu}, etc., by answering questions and providing solutions to programming issues, \textbf{\emph{reaching hundreds of thousands of developers}} and helping to resolve their programming challenges. Demonstrated expertise in Git, Linux, bash, JavaScript, React, SpringBoot, Java, etc.}
-\resumeItemListEnd
-
-\resumeSubHeadingListEnd
-
-%-----------CERTIFICATIONS-----------
-\section{\textbf{Certifications}}
-
-\resumeSubHeadingListStart
-
-\resumeSubheading
-{Developer Profession - L2 Experienced Developer}{March 2022 - March 2027}
-{IBM}{Southbury, CT}
-\resumeItemListStart
-\resumeItem{An IBM Experienced Developer understands client needs and applies knowledge to develop high quality solutions that deliver business value to the client.}
-\resumeItem{Apply technical skills and knowledge of the client's business issues to lead a workstream to develop solutions to meet the client's needs.}
-\resumeItem{Is a strong vocal advocate within the developer community and relevant open source communities providing advice and helping others to contribute.}
-\resumeItem{Enhance and maintain IBM's technical vitality through giveback such as teaching, speaking at events, development of Intellectual capital and assets, publications, technical presentations and voluntary work for the Profession.}
-\resumeItemListEnd
-
-\resumeSubheading
-{IBM BlueCore Coach}{March 2023}
-{IBM}{Southbury, CT}
-\resumeItemListStart
-\resumeItem{Recognized by IBM for having demonstrated exceptional aptitude and dedication in applying the GROW coaching model and the International Coaching Federation (ICF) competencies to drive a winning culture within the organization. He has successfully completed the Blue Core Coaching (BCC) Learning Program, achieving a remarkable score of 80\% or higher on the competency test. Additionally, he has showcased his coaching prowess by conducting individual sessions with at least two IBMers, providing tailored guidance over a ten-week period and receiving valuable feedback. Participating in a triad session under the supervision of a Coach Supervisor, has further honed his skills and demonstrated a deep understanding of the ICF Coaching Competencies and Code of Ethics.}
-\resumeItemListEnd
-
-\resumeSubheading
-{IBM BlueCore Mentor}{January 2023 - May 2025}
-{IBM}{Southbury, CT}
-\resumeItemListStart
-\resumeItem{Recognized by IBM for developing and cultivating a Mentoring relationship with at least 3 mentees. The earner have taken training (formal or informal/on the job) to ensure quality feedback and guidance is provided to the mentees. The badge earner has received positive feedback from the mentees and is recognized as a role model. Mentoring is an important career development opportunity IBM employees use to enhance skills and achieve long-term career aspirations.}
-\resumeItemListEnd
-
-\resumeSubheading
-{IBM Mentor}{September 2021}
-{IBM}{Southbury, CT}
-\resumeItemListStart
-\resumeItem{Recognized by IBM for developing and cultivating a mentoring relationship with others. Mentoring is an important career development opportunity to enhance skills and achieve long-term career aspirations. The guidance given to the protégé has subsequently enabled the protégé to gain skills and expertise to support their career development, expertise in the job, and/or social skills. The value of the mentoring benefits and impact was validated by the protégé.}
-\resumeItemListEnd
-
-\resumeSubHeadingListEnd
-
-%-----------AWARDS-----------
-\section{\textbf{Awards}}
-
-\resumeSubHeadingListStart
-
-\resumeProjectHeading
-{\textbf{2023 Beacon of Excellence Mentoring Award}}{}
-\resumeItemListStart
-\resumeItemBulletless{Celebrates the exceptional mentors and mentees who have dedicated their time, knowledge, and expertise to empower others to achieve their goals and unlock their full potential.}
-\resumeItemListEnd
-
-\resumeProjectHeading
-{\textbf{2023 Growth Award}}{}
-\resumeItemListStart
-\resumeItemBulletless{A prestigious award for accelerating IBM strategies. A recognition that celebrates not just individual achievement but the power of collaborative innovation.}
-\resumeItemListEnd
-
-\resumeProjectHeading
-{\textbf{2022 Design Heros Award}}{}
-\resumeItemListStart
-\resumeItemBulletless{Design Success Heroes are individuals and squads demonstrating behaviors that result in superior employee experiences.}
-\resumeItemListEnd
-
-\resumeSubHeadingListEnd
-
-%-----------PROJECTS-----------
+%----------Projects-------------
 \section{\textbf{Projects}}
 
 \resumeSubHeadingListStart
@@ -327,43 +163,19 @@ Award-winning, performance-driven full-stack software engineer with a demonstrat
 \resumeProjectHeading
 {\textbf{set-me-up} $|$ \href{https://github.com/nicholasadamou/set-me-up}{\underline{https://github.com/nicholasadamou/set-me-up}} $|$ \emph{Shell, Python, PHP, AppleScript}}{}
 \resumeItemListStart
-\resumeItemBulletless{set-me-up aims to simplify the dull setup and maintenance of Mac OS development environments.}
+\resumeItemBulletless{\emph{set-me-up} aims to simplify the dull setup and maintenance of Mac OS and \emph{debian} development environments.}
+\resumeItemListEnd
+
+\resumeProjectHeading
+{\textbf{set-me-up-installer} $|$ \href{https://github.com/nicholasadamou/set-me-up-installer}{\underline{https://github.com/nicholasadamou/set-me-up-installer}} $|$ \emph{Shell, Python}}{}
+\resumeItemListStart
+\resumeItemBulletless{A binary used to install and configure \emph{set-me-up} on \emph{Mac} and \emph{debian} linux machines.}
 \resumeItemListEnd
 
 \resumeProjectHeading
 {\textbf{set-me-up-blueprint} $|$ \href{https://github.com/nicholasadamou/set-me-up-blueprint}{\underline{https://github.com/nicholasadamou/set-me-up-blueprint}} $|$ \emph{Shell}}{}
 \resumeItemListStart
-\resumeItemBulletless{A template to manage set-me-up setups.}
-\resumeItemListEnd
-
-\resumeProjectHeading
-{\textbf{plex-s3fs} $|$ \href{https://github.com/nicholasadamou/plex-s3fs}{\underline{https://github.com/nicholasadamou/plex-s3fs}} $|$ \emph{Shell}}{}
-\resumeItemListStart
-\resumeItemBulletless{A Plex Media Server that is backed by an Amazon S3 Bucket.}
-\resumeItemListEnd
-
-\resumeProjectHeading
-{\textbf{clion-gateway} $|$ \href{https://github.com/nicholasadamou/clion-gateway}{\underline{https://github.com/nicholasadamou/clion-gateway}} $|$ \emph{Shell, Dockerfile, CMake, C++}}{}
-\resumeItemListStart
-\resumeItemBulletless{A portal to CLion using JetBrains Gateway and Docker.}
-\resumeItemListEnd
-
-\resumeProjectHeading
-{\textbf{down-to-network} $|$ \href{https://github.com/nicholasadamou/down-to-network}{\underline{https://github.com/nicholasadamou/down-to-network}} $|$ \emph{JavaScript}}{}
-\resumeItemListStart
-\resumeItemBulletless{Down to Network is a dynamic web / mobile app optimized to connect new fellow IBMers to experienced IBMers through the power of matching.}
-\resumeItemListEnd
-
-\resumeProjectHeading
-{\textbf{humblescraper} $|$ \href{https://github.com/nicholasadamou/humblescraper}{\underline{https://github.com/nicholasadamou/humblescraper}} $|$ \emph{Python}}{}
-\resumeItemListStart
-\resumeItemBulletless{A small script to retrieve Name, Price/Sale, and Time information from Humble Bundle store links for use in robots or web-hooks. Uses selenium.}
-\resumeItemListEnd
-
-\resumeProjectHeading
-{\textbf{krios-github-bot} $|$ \href{https://github.com/nicholasadamou/krios-github-bot}{\underline{https://github.com/nicholasadamou/krios-github-bot}} $|$ \emph{Python}}{}
-\resumeItemListStart
-\resumeItemBulletless{A pal that keeps your dependencies up-to-date.}
+\resumeItemBulletless{A template to manage \emph{set-me-up} setups.}
 \resumeItemListEnd
 
 \resumeSubHeadingListEnd
